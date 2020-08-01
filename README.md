@@ -1,11 +1,17 @@
 # Image Tagger 
 
+---
+**NOTE:** docs below are currently an implementation guide. Listed features are
+not yet available.
+---
+
 A github image for easily producing a matrix of docker image tags based
 using semver, and other common docker tagging strategies as inputs.
 
 Use with [Events that trigger workflows](https://docs.github.com/en/actions/reference/events-that-trigger-workflows)
 
 - [Image Tagger](#image-tagger)
+  - [not yet available.](#not-yet-available)
   - [Usage](#usage)
     - [Inputs](#inputs)
       - [Strategies](#strategies)
