@@ -1,0 +1,28 @@
+{
+  "name": "image-tagger",
+  "version": "1.0.0",
+  "description": "A github action for specifying tagging strategies for docker images using semver or other common docker tags",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HackerHappyHour/image-tagger.git"
+  },
+  "keywords": [
+    "actions",
+    "semver",
+    "docker"
+  ],
+  "author": "Brian Vanderbusch <chief@hackerhappyhour.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/HackerHappyHour/image-tagger/issues"
+  },
+  "homepage": "https://github.com/HackerHappyHour/image-tagger#readme",
+  "dependencies": {
+    "@actions/core": "^1.2.4",
+    "@actions/github": "^4.0.0"
+  }
+}
