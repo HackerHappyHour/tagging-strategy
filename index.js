@@ -1,7 +1,12 @@
 const core = require('@actions/core')
 const github = require('@actions/github')
+const semver = require('semver')
 
 try {
+  const payload = JSON.stringify(github.context.payload)
+  console.log(payload)
+  console.log(semver)
+
   // get tag-pattern-matcher
   const pattern = core.getInput('pattern')
   console.log(`Using the ${pattern} tag for this run`)
@@ -14,4 +19,5 @@ try {
   core.setOutput("tag", tag)
 } catch (error) {
   // do error handling stuff
+  core.setFailed('CHIEF screwed up somewhere')
 }
