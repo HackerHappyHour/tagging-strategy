@@ -1,5 +1,5 @@
 {
-  "name": "image-tagger",
+  "name": "tagging-strategy",
   "version": "1.0.0",
   "description": "A github action for specifying tagging strategies for docker images using semver or other common docker tags",
   "main": "index.js",
