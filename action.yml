@@ -1,0 +1,17 @@
+name: 'Tagging Strategy'
+description: 'Easy Tag creating for docker tagging strategies'
+inputs:
+  pattern:
+    description: 'The tagging strategy for this run'
+    required: true
+    default: 'X.Y.Z'
+  payload_key:
+    description: 'The lookup for raw tag'
+    required: false
+    default: 'github.event.*.tag'
+outputs:
+  tag:
+    description: 'Outputs a tag based on the the strategy for this run'
+runs:
+  using: 'node12'
+  main: 'index.js'
