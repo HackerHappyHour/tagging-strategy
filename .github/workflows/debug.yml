@@ -10,7 +10,7 @@ jobs:
     steps:
     - name: Tagging Strategy
       id: tagging_strategy
-      uses: HackerHappyHour/image-tagger
+      uses: HackerHappyHour/image-tagger@master
       with:
         pattern: 'X.Y.Z'
     - name: Debugging Log
