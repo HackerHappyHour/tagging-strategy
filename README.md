@@ -1,4 +1,4 @@
-# Image Tagger 
+# Tagging Strategy
 
 ---
 **NOTE:** docs below are currently an implementation guide. Listed features are
@@ -10,7 +10,7 @@ using semver, and other common docker tagging strategies as inputs.
 
 Use with [Events that trigger workflows](https://docs.github.com/en/actions/reference/events-that-trigger-workflows)
 
-- [Image Tagger](#image-tagger)
+- [Tagging Strategy](#tagging-strategy)
   - [not yet available.](#not-yet-available)
   - [Usage](#usage)
     - [Inputs](#inputs)
@@ -31,8 +31,8 @@ jobs:
 
     # Image Tagger
     - name: Image Tag Strategy
-      id: tag-strategy
-      uses: HackerHappyHour/image-tagger@v1
+      id: tag_strategy
+      uses: HackerHappyHour/tagging-strategy@v1
       if: ${{ github.event_name == 'release' }}
       with:
         pattern: ${{ matrix.image-tagger-patterns }}
@@ -42,7 +42,7 @@ jobs:
 
     - name: Build
       run: |
-        docker buildx build -t ${{ github.repo }}:${{ steps.tag-strategy.output.tag }} .
+        docker buildx build -t ${{ github.repo }}:${{ steps.tag_strategy.output.tag }} .
 ```
 
 ### Inputs

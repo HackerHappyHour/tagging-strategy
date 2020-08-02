@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/HackerHappyHour/image-tagger.git"
+    "url": "git+https://github.com/HackerHappyHour/tagging-strategy.git"
   },
   "keywords": [
     "actions",
@@ -18,9 +18,9 @@
   "author": "Brian Vanderbusch <chief@hackerhappyhour.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/HackerHappyHour/image-tagger/issues"
+    "url": "https://github.com/HackerHappyHour/tagging-strategy/issues"
   },
-  "homepage": "https://github.com/HackerHappyHour/image-tagger#readme",
+  "homepage": "https://github.com/HackerHappyHour/tagging-strategy#readme",
   "dependencies": {
     "@actions/core": "^1.2.4",
     "@actions/github": "^4.0.0",
