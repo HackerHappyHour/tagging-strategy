@@ -40,7 +40,7 @@ module.exports =
 /******/ 	// the startup function
 /******/ 	function startup() {
 /******/ 		// Load entry module and return exports
-/******/ 		return __webpack_require__(474);
+/******/ 		return __webpack_require__(840);
 /******/ 	};
 /******/
 /******/ 	// run startup
@@ -4869,34 +4869,6 @@ exports.Octokit = Octokit;
 
 /***/ }),
 
-/***/ 474:
-/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
-
-const core = __webpack_require__(236)
-const github = __webpack_require__(89)
-
-try {
-  const payload = JSON.stringify(github.context)
-  console.log(context)
-
-  // get tag-pattern-matcher
-  const pattern = core.getInput('pattern')
-  const payloadKey = core.getInput('payload_key')
-  console.log(`Using the ${pattern} tag for this run`)
-
-  // this will be a function to parse the input against the event payload
-  // to produce a refined tag
-
-  // finally, return output
-  core.setOutput("strategy_tag", 'latest')
-} catch (error) {
-  // do error handling stuff
-  core.setFailed('CHIEF screwed up somewhere')
-}
-
-
-/***/ }),
-
 /***/ 603:
 /***/ (function(__unusedmodule, exports) {
 
@@ -5580,6 +5552,34 @@ module.exports = require("zlib");
 /***/ (function(module) {
 
 module.exports = require("url");
+
+/***/ }),
+
+/***/ 840:
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+const core = __webpack_require__(236)
+const github = __webpack_require__(89)
+
+try {
+  const payload = JSON.stringify(github.context)
+  console.log(context)
+
+  // get tag-pattern-matcher
+  const pattern = core.getInput('pattern')
+  const payloadKey = core.getInput('payload_key')
+  console.log(`Using the ${pattern} tag for this run`)
+
+  // this will be a function to parse the input against the event payload
+  // to produce a refined tag
+
+  // finally, return output
+  core.setOutput("strategy_tag", 'latest')
+} catch (error) {
+  // do error handling stuff
+  core.setFailed('CHIEF screwed up somewhere')
+}
+
 
 /***/ }),
 
