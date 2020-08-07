@@ -11,9 +11,9 @@ jobs:
       uses: actions/checkout@v2
     - name: Tagging Strategy
       id: tagging
-      uses: HackerHappyHour/tagging-strategy@1.0.0-debug7
+      uses: ./
       with:
         pattern: 'X.Y.Z'
     - name: Debugging Log
       id: debug_log
-      run: echo "${{ steps.tagging.outputs.strategy_tag }}"
+      run: echo "The refined tag is ${{ steps.tagging.outputs.strategy_tag }}"
