@@ -10,7 +10,7 @@ inputs:
     required: false
     default: 'github.event.*.tag'
 outputs:
-  tag:
+  strategy_tag:
     description: 'Outputs a tag based on the the strategy for this run'
 runs:
   using: 'node12'
