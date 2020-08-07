@@ -5577,6 +5577,7 @@ try {
   core.setOutput("strategy_tag", 'latest')
 } catch (error) {
   // do error handling stuff
+  console.error(error)
   core.setFailed('CHIEF screwed up somewhere')
 }
 
