@@ -14,4 +14,4 @@ jobs:
         pattern: 'X.Y.Z'
     - name: Debugging Log
       id: debug_log
-      run: echo "${{ steps.tagging_strategy.output.strategy_tag }}"
+      run: echo "${{ steps.tagging_strategy.outputs.strategy_tag }}"
