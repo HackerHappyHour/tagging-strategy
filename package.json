@@ -27,6 +27,7 @@
     "semver": "^7.3.2"
   },
   "devDependencies": {
+    "husky": "^4.2.5",
     "jest": "^26.2.2"
   }
 }
