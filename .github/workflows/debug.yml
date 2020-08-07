@@ -9,7 +9,7 @@ jobs:
     steps:
     - name: Tagging Strategy
       id: tagging
-      uses: HackerHappyHour/tagging-straegy@1.0.0-debug7
+      uses: HackerHappyHour/tagging-strategy@1.0.0-debug7
       with:
         pattern: 'X.Y.Z'
     - name: Debugging Log
