@@ -14,6 +14,6 @@ jobs:
       uses: ./
       with:
         pattern: 'X.Y.Z'
-    - name: Debugging Log
+    - name: Check Output
       id: debug_log
-      run: echo "The refined tag is ${{ steps.tagging.outputs.strategy_tag }}"
+      run: echo "The resulting tag is ${{ steps.tagging.outputs.strategy_tag }}"
