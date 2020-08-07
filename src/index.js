@@ -1,11 +1,10 @@
 const core = require('@actions/core')
 const github = require('@actions/github')
-const semver = require('semver')
+const {parseTag} = require('./parser')
 
 try {
-  const payload = JSON.stringify(github.context.payload)
-  console.log(payload)
-  console.log(semver)
+  const payload = JSON.stringify(github.context)
+  console.log(context)
 
   // get tag-pattern-matcher
   const pattern = core.getInput('pattern')
