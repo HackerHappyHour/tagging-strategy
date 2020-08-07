@@ -5562,8 +5562,9 @@ const core = __webpack_require__(236)
 const github = __webpack_require__(89)
 
 try {
-  const payload = JSON.stringify(github.context)
-  console.log(context)
+  const log = JSON.stringify(github.context)
+
+  console.log(log)
 
   // get tag-pattern-matcher
   const pattern = core.getInput('pattern')

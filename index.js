@@ -2,8 +2,9 @@ const core = require('@actions/core')
 const github = require('@actions/github')
 
 try {
-  const context = JSON.stringify(github.context)
-  console.log(context)
+  const log = JSON.stringify(github.context)
+
+  console.log(log)
 
   // get tag-pattern-matcher
   const pattern = core.getInput('pattern')
