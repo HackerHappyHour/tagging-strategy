@@ -1,7 +1,6 @@
 name: Debug
 
-on:
-  release:
+on: [push]
 
 jobs:
   debug:
@@ -10,10 +9,9 @@ jobs:
     steps:
     - name: Tagging Strategy
       id: tagging_strategy
-      uses: HackerHappyHour/image-tagger@master
+      uses: HackerHappyHour/image-tagger@1.0.0-debug6
       with:
         pattern: 'X.Y.Z'
     - name: Debugging Log
       id: debug_log
-      run: |
-        echo ${{ steps.tagging_strategy.output.tag }}
+      run: echo "${{ steps.tagging_strategy.outputs.strategy_tag }}"
