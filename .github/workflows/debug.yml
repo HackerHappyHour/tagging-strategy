@@ -8,10 +8,10 @@ jobs:
 
     steps:
     - name: Tagging Strategy
-      id: tagging_strategy
-      uses: HackerHappyHour/image-tagger@1.0.0-debug7
+      id: tagging
+      uses: HackerHappyHour/tagging-straegy@1.0.0-debug7
       with:
         pattern: 'X.Y.Z'
     - name: Debugging Log
       id: debug_log
-      run: echo "${{ steps.tagging_strategy.outputs.strategy_tag }}"
+      run: echo "${{ steps.tagging.outputs.strategy_tag }}"
