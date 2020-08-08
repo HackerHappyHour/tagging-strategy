@@ -1,0 +1,18 @@
+name: Release Dispatch
+
+on:
+  repository_dispatch:
+    types: [release, prerelease]
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: tagging
+        id: debug
+        uses: ./
+        with:
+          pattern: 'X.Y.Z'
