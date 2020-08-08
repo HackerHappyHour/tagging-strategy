@@ -36,7 +36,7 @@ jobs:
       if: ${{ github.event_name == 'release' }}
       with:
         pattern: ${{ matrix.image-tagger-patterns }}
-        event: ${{ github.event }}
+        event: ${{ github.ref }}
     - name: Setup Buildx
       id: setup
       uses: crazy-max/ghaction-docker-buildx@v3
