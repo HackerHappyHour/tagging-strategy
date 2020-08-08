@@ -6,7 +6,7 @@ try {
 
   // get tag-pattern-matcher
   const pattern = core.getInput('pattern')
-  const payloadKey = core.getInput('payload_key')
+  const payloadKey = core.getInput('tag_name')
   console.log(`Using the ${pattern} tag for this run`)
 
   // this will be a function to parse the input against the event payload

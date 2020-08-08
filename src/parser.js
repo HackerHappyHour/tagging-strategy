@@ -1,5 +1,6 @@
 const parse = require('semver/functions/parse')
 const valid = require('semver/functions/valid')
+const github = require('@actions/github')
 
 const delimiter = '%'
 const replacers = {
