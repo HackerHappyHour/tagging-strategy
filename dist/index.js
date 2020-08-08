@@ -5567,7 +5567,7 @@ try {
   // get tag-pattern-matcher
   const pattern = core.getInput('pattern')
   const tag = core.getInput('tag_name')
-  console.log(`Parsing with ${pattern} tag for this run`)
+  console.log(`Parsing ${tag} with ${pattern} tag for this run`)
   console.log('tag', tag)
 
   // this will be a function to parse the input against the event payload
