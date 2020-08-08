@@ -13,6 +13,7 @@ jobs:
       id: tagging
       uses: ./
       with:
+        tag_name: ${{ github.ref }}
         pattern: 'X.Y.Z'
     - name: Check Output
       id: debug_log
