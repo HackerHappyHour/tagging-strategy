@@ -28,6 +28,10 @@ describe('if delimiters found', () => {
     }
     expect(parseTag(pattern, '1.0.0')).toMatchObject(output)
     expect(parseTag(pattern, 'v1.0.0-foobarbaz1')).toMatchObject(output)
+
+    // non-strict tags will be coerced to strict tags
+    expect(parseTag(pattern, 'x1.0.0')).toMatchObject(output)
+    expect(parseTag(pattern, 'x1.0.0xyz')).toMatchObject(output)
     expect(parseTag(pattern, '1')).toMatchObject(output)
     expect(parseTag(pattern, 'v1')).toMatchObject(output)
   })
