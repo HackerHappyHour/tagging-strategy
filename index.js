@@ -7,16 +7,18 @@ try {
   // get tag-pattern-matcher
   const pattern = core.getInput('pattern')
   const tag = core.getInput('tag_name')
-  console.log(`Parsing ${tag} with ${pattern} tag for this run`)
-  console.log('tag', tag)
+
+  core.info(`Parsing ${tag} with ${pattern} tag for this run`)
 
   // this will be a function to parse the input against the event payload
   // to produce a refined tag
+  const strategy_tag = 'latest'
 
   // finally, return output
-  core.setOutput("strategy_tag", 'latest')
+  core.setOutput("strategy_tag", strategy_tag)
+
 } catch (error) {
   // do error handling stuff
-  console.error(error)
+  core.error(error)
   core.setFailed('CHIEF screwed up somewhere')
 }
