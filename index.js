@@ -1,11 +1,10 @@
 const core = require('@actions/core')
 const github = require('@actions/github')
-const semver = require('semver')
 
 try {
-  const payload = JSON.stringify(github.context.payload)
-  console.log(payload)
-  console.log(semver)
+  const log = JSON.stringify(github.context)
+
+  console.log(log)
 
   // get tag-pattern-matcher
   const pattern = core.getInput('pattern')
@@ -19,5 +18,6 @@ try {
   core.setOutput("strategy_tag", 'latest')
 } catch (error) {
   // do error handling stuff
+  console.error(error)
   core.setFailed('CHIEF screwed up somewhere')
 }
