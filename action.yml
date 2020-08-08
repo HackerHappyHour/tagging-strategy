@@ -5,10 +5,9 @@ inputs:
     description: 'The tagging strategy for this run'
     required: true
     default: 'X.Y.Z'
-  payload_key:
-    description: 'The lookup for raw tag'
-    required: false
-    default: 'github.event.*.tag'
+  tag_name:
+    description: 'The string to parse'
+    required: true
 outputs:
   strategy_tag:
     description: 'Outputs a tag based on the the strategy for this run'
