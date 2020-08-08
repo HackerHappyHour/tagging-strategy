@@ -1,6 +1,9 @@
 name: Debug
 
-on: [push]
+on: 
+  push:
+    branches:
+      - debug
 
 jobs:
   debug:
