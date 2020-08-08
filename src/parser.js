@@ -1,5 +1,4 @@
-const parse = require('semver/functions/parse')
-const valid = require('semver/functions/valid')
+const s = require('semver')
 const github = require('@actions/github')
 
 const delimiter = '%'
@@ -9,21 +8,29 @@ const replacers = {
   Z: 'patch'
 }
 
+const errorInvalidTag = {error: 'value is not valid or cannot be coerced'}
+
 exports.parseTag = (strategy, tag) => {
-  if (strategy = 'latest') return 'latest'
+  if (strategy === 'latest') return 'latest'
 
   try {
     // if 'tag' is valid, attempt to parse it
     // otherwise error: value is not valid or cannot be coerced
-    if (!valid(tag)){
+    var parsedTag = s.parse(tag, {includePrerelease: true})
+    if (!parsedTag){
+      parsedTag = s.parse(s.valid(s.coerce(tag)))
+      if (!parsedTag) throw errorInvalidTag.error
+    } 
 
-    } else {
-      throw 'value is not valid or cannot be coerced'
-    }
+    // parse away!
+    // find X/Y/Z between %%'s or if only alpha's in string are X/Y/Z
+    return {strategy_tag: 'latest'}
 
   } catch (error) {
     return {error: error}
   }
 
-
 }
+
+exports.replacers = replacers
+exports.errorInvalidTag = errorInvalidTag

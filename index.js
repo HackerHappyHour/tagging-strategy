@@ -1,5 +1,6 @@
 const core = require('@actions/core')
 const github = require('@actions/github')
+const {parseTag} = require('./src/parser')
 
 try {
   core.debug(JSON.stringify(github.context))
@@ -12,13 +13,13 @@ try {
 
   // this will be a function to parse the input against the event payload
   // to produce a refined tag
-  const strategy_tag = 'latest'
-
+  const {error, strategy_tag} = parseTag(pattern, tag)
+  if (error) throw error
   // finally, return output
   core.setOutput("strategy_tag", strategy_tag)
 
 } catch (error) {
   // do error handling stuff
   core.error(error)
-  core.setFailed('CHIEF screwed up somewhere')
+  core.setFailed(`Tagging Strategy was unable to parse your tag...\n${error}`)
 }
