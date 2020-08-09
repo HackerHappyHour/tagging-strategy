@@ -14,7 +14,7 @@ Use with [Events that trigger workflows](https://docs.github.com/en/actions/refe
   - [not yet available.](#not-yet-available)
   - [Usage](#usage)
     - [Inputs](#inputs)
-      - [Strategies](#strategies)
+    - [Outputs](#outputs)
 
 ## Usage
 
@@ -24,26 +24,26 @@ jobs:
     runs-on: ubuntu-latest
     stategy:
       matrix:
-        image-tagger-patterns: ['latest', 'OS', 'X', 'X.Y', 'X.Y.Z',]
+        image-tagger-patterns: ['%X%-foobar', '%X.Y%-foobar', '%X.Y.Z%-foobar']
 
     steps:
     # checkout steps etc...
 
     # Image Tagger
     - name: Image Tag Strategy
-      id: tag_strategy
+      id: tagging
       uses: HackerHappyHour/tagging-strategy@v1
       if: ${{ github.event_name == 'release' }}
       with:
         pattern: ${{ matrix.image-tagger-patterns }}
-        event: ${{ github.ref }}
+        tag_name: ${{ github.ref }}
     - name: Setup Buildx
       id: setup
       uses: crazy-max/ghaction-docker-buildx@v3
 
     - name: Build
       run: |
-        docker buildx build -t ${{ github.repo }}:${{ steps.tag_strategy.output.tag }} .
+        docker buildx build -t ${{ github.repo }}:${{ steps.tagging.outputs.tag }} .
 ```
 
 ### Inputs
@@ -51,29 +51,10 @@ jobs:
 | Name             | Type    | Required   | Description                        |
 |------------------|---------|------------|------------------------------------|
 | `pattern`        | [Strategy](#strategies) | yes | The strategy to parse the tag paylod with |
-| `payload_key` | String | no | They payload key used as a lookup for pattern parsing |
+| `tag_name` | String | no | They payload key used as a lookup for pattern parsing |
 
-#### Strategies
+### Outputs
 
-Use `%` for strategy variables when using a combination strategy. If given
-a string without `%`, the parser will infer the `%` surrounds the given string.
-
-All keys are accessd via the `github.event` context. The keys listed below can be
-overriden by providing a value to the `payload_key` input. 
-
-Any string that is not deliminated with `%` will be used as a literal value
-and passed through to the output.
-
-**Supported Strategy Variables**
-| Strategy | produces | Default Lookup Key |
-| -------- | ------ | ---------------------------- |
-| `latest` | `latest` | `github.event.*.tag` |
-| `X` | Major version | `github.event.*.tag` |
-| `X.Y` | Major and Minor Version | `github.event.*.tag` |
-| `X.Y.Z` | | `github.event.*.tag` |
-
-**Examples**
-
-```yaml
-image-trigger-patterns: ['%X%-buster', '%X.Y%-buster']
-```
+| Name             | Type    | Description |
+|------------------|---------|-------------|
+| `tag` | `String` | The transformed tag |

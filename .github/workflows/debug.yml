@@ -20,4 +20,4 @@ jobs:
         pattern: 'X.Y.Z'
     - name: Check Output
       id: debug_log
-      run: echo "The resulting tag is ${{ steps.tagging.outputs.strategy_tag }}"
+      run: echo "The resulting tag is ${{ steps.tagging.outputs.tag }}"

@@ -18,8 +18,9 @@ test('it accepts "latest"', () => {
 test.each(strategies)(
   '.parseTag("%s", "%s") returns %s', 
   (strategy, release, expected) => {
-  let {tag} = parseTag(strategy, release)
+  let {tag, error} = parseTag(strategy, release)
   expect(tag).toMatch(expected)
+  expect(error).toBeUndefined()
 })
 
 test.skip('it returns an error if any un-parseable alpha chars exist', () => {
