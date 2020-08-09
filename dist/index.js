@@ -5764,7 +5764,6 @@ exports.Octokit = Octokit;
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 const s = __webpack_require__(24)
-const github = __webpack_require__(89)
 const core = __webpack_require__(236)
 const {getIdentifier} = __webpack_require__(350)
 const {invalidTag, tooManyPatterns} = __webpack_require__(512)
