@@ -4886,6 +4886,26 @@ module.exports.Collection = Hook.Collection
 
 /***/ }),
 
+/***/ 350:
+/***/ (function(__unusedmodule, exports) {
+
+exports.getIdentifier = (identifier, raw) => {
+  if(!identifier) return ''
+  var single = new RegExp('\\W+(' + `${identifier}` + ')$')
+  var multi = new RegExp('\\W+(' + `${identifier[0]}`+ '.*' + `${identifier[identifier.length - 1]}`+')$')
+
+  switch (identifier.length){
+    case 1:
+      return raw.slice(raw.search(single), raw.length)
+      break;
+    default:
+      return raw.slice(raw.search(multi), raw.length)
+  }
+}
+
+
+/***/ }),
+
 /***/ 357:
 /***/ (function(module) {
 
@@ -5743,15 +5763,14 @@ exports.Octokit = Octokit;
 
 const s = __webpack_require__(24)
 const github = __webpack_require__(89)
-
-const errorInvalidTag = {error: 'value is not valid or cannot be coerced'}
-const errorTooManyPatterns = {error: 'only one pattern allowed per strategy'}
+const {getIdentifier} = __webpack_require__(350)
+const {invalidTag, tooManyPatterns} = __webpack_require__(512)
 
 const matcher = /(%(?<strategy>(?<major>x?)\.?(?<minor>y?)\.?(?<patch>z?))%)(?<variant>.*)/ig
 
 exports.parseTag = (pattern, tag) => {
   if (pattern === 'latest') return {tag: 'latest'}
-  if (pattern.indexOf('%') > 2) {error: errorTooManyPatterns}
+  if (pattern.indexOf('%') > 2) return {error: tooManyPatterns}
 
   let Tag = {}
   let matches = pattern.matchAll(matcher)
@@ -5761,43 +5780,26 @@ exports.parseTag = (pattern, tag) => {
   var parsedTag = s.parse(tag, {includePrerelease: true})
   if (!parsedTag){
     parsedTag = s.parse(s.valid(s.coerce(tag)))
-    if (!parsedTag) return errorInvalidTag.error
+    if (!parsedTag) return {error: invalidTag}
   } 
 
   const {major, minor, patch} = parsedTag
   const identifier = getIdentifier(parsedTag.prerelease, parsedTag.raw) 
 
   for(let match of matches){
-    const {strategy, variant} = match.groups
-    Tag = {...Tag, strategy, variant, major, minor, patch, identifier}
+    const {major: maj, minor:min, patch:fix, strategy, variant} = match.groups
+    Tag = {...Tag, strategy, variant, identifier, maj, min, fix, major, minor, patch}
+
+    let output = strategy
+    if(maj){output = output.replace(/x/ig, major)}
+    if(min){output = output.replace(/y/ig, minor)}
+    if(fix){output = output.replace(/z/ig, patch)}
+    Tag.tag = `${output}${identifier}${variant}`
 
   }
 
   return Tag
 }
-
-function getIdentifier(identifier, raw){
-  if(!identifier) return ''
-  switch (identifier.length){
-    case 1:
-      return identifier
-      break;
-    default:
-      return raw.slice(
-        raw.search(identifierRegex(identifier)),
-        raw.length
-      )
-  }
-}
-
-function identifierRegex(identifier){
-  var replace = '\\W+(' + `${identifier[0]}`+ '.*' + `${identifier[identifier.length - 1]}`+')$'
-  return new RegExp(replace)
-  
-}
-
-exports.replacers = replacers
-exports.errorInvalidTag = errorInvalidTag
 
 
 /***/ }),
@@ -6095,6 +6097,16 @@ class SemVer {
 }
 
 module.exports = SemVer
+
+
+/***/ }),
+
+/***/ 512:
+/***/ (function(__unusedmodule, exports) {
+
+
+exports.invalidTag = {message: 'tag_name value is not valid or cannot be coerced'}
+exports.tooManyPatterns = {message: 'only one pattern allowed per strategy'}
 
 
 /***/ }),
@@ -7350,16 +7362,16 @@ try {
 
   // get tag-pattern-matcher
   const pattern = core.getInput('pattern')
-  const tag = core.getInput('tag_name')
+  const inputTag = core.getInput('tag_name')
 
-  core.info(`Parsing ${tag} with ${pattern} tag for this run`)
+  core.info(`Parsing ${inputTag} with ${pattern} tag for this run`)
 
   // this will be a function to parse the input against the event payload
   // to produce a refined tag
-  const {error, strategy_tag} = parseTag(pattern, tag)
-  if (error) throw error
+  const {error, tag} = parseTag(pattern, inputTag)
+  if (error) throw error.message
   // finally, return output
-  core.setOutput("strategy_tag", strategy_tag)
+  core.setOutput("tag", tag)
 
 } catch (error) {
   // do error handling stuff

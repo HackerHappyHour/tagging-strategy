@@ -9,7 +9,7 @@ inputs:
     description: 'The string to parse'
     required: true
 outputs:
-  strategy_tag:
+  tag:
     description: 'Outputs a tag based on the the strategy for this run'
 runs:
   using: 'node12'

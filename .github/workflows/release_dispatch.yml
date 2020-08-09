@@ -16,4 +16,4 @@ jobs:
         uses: ./
         with:
           pattern: 'X.Y.Z'
-          tag_name: ${{ github.event.client_payload.tag_name }}
+          tag_name: ${{ github.event.client_payload.tag }}
