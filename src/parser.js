@@ -9,30 +9,52 @@ const replacers = {
 }
 
 const errorInvalidTag = {error: 'value is not valid or cannot be coerced'}
+const errorTooManyPatterns = {error: 'only one pattern allowed per strategy'}
 
-const matcher = /%(?<major>x?)\.?(?<minor>y?)\.?(?<patch>z?)%/ig
+const matcher = /(%(?<strategy>(?<major>x?)\.?(?<minor>y?)\.?(?<patch>z?))%)(?<prerelease>.*)/ig
 
-exports.parseTag = (strategy, tag) => {
-  if (strategy === 'latest') return 'latest'
+exports.parseTag = (pattern, tag) => {
+  if (pattern === 'latest') return 'latest'
 
-  let matches = strategy.matchAll(matcher)
+  let matches = pattern.matchAll(matcher)
 
-  try {
-    // if 'tag' is valid, attempt to parse it
-    // otherwise error: value is not valid or cannot be coerced
-    var parsedTag = s.parse(tag, {includePrerelease: true})
-    if (!parsedTag){
-      parsedTag = s.parse(s.valid(s.coerce(tag)))
-      if (!parsedTag) throw errorInvalidTag.error
+    if(pattern.indexOf('%') > 2){
+      throw `pattern ${pattern} has too many %'s`
+    } else {
+      try {
+          // if 'tag' is valid, attempt to parse it
+        // otherwise error: value is not valid or cannot be coerced
+        var parsedTag = s.parse(tag, {includePrerelease: true})
+        if (!parsedTag){
+          parsedTag = s.parse(s.valid(s.coerce(tag)))
+          if (!parsedTag) throw errorInvalidTag.error
+        } 
+
+        var Tag = {}
+        var modifier
+        for(let match of matches){
+          let strategy_tag
+          const {strategy, prerelease} = match.groups
+          const {major, minor, patch} = parsedTag
+          Tag.rawTag = tag
+          Tag.pattern = pattern
+          Tag.prerelease = prerelease
+          Tag.major = major
+          Tag.minor = minor
+          Tag.patch = patch
+          strategy_tag = strategy.replace(/x/i, major)  
+          strategy_tag = strategy_tag.replace(/y/i, minor)
+          strategy_tag = strategy_tag.replace(/z/i, patch)
+          Tag.version = strategy_tag
+          Tag.modifier = prerelease
+        }
+        return Tag
+      } catch (error) {
+        console.error(error)
+        return {error: error}
+      }
+
     } 
-
-    // parse away!
-    // find X/Y/Z between %%'s or if only alpha's in string are X/Y/Z
-    return {strategy_tag: 'latest'}
-
-  } catch (error) {
-    return {error: error}
-  }
 
 }
 
