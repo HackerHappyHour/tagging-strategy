@@ -8,9 +8,6 @@ exports.getIdentifier = (identifier, raw) => {
       return raw.slice(raw.search(single), raw.length)
       break;
     default:
-      return raw.slice(
-        raw.search(multi),
-        raw.length
-      )
+      return raw.slice(raw.search(multi), raw.length)
   }
 }
