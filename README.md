@@ -4,16 +4,13 @@ A github image for easily producing a matrix of docker image tags based
 using semver, and other common docker tagging strategies as inputs.
 
 - [Tagging Strategy](#tagging-strategy)
-  - [Usage](#usage)
-    - [Inputs](#inputs)
-    - [Outputs](#outputs)
-    - [Examples](#examples)
+  - [Inputs](#inputs)
+  - [Outputs](#outputs)
+  - [Examples](#examples)
     - [From Release on repo](#from-release-on-repo)
     - [From Release on External Repository](#from-release-on-external-repository)
 
-## Usage
-
-### Inputs
+## Inputs
 
 | Name             | Type    | Required   | Description                        |
 |------------------|---------|------------|------------------------------------|
@@ -21,13 +18,13 @@ using semver, and other common docker tagging strategies as inputs.
 | `tag_name` | String | yes | A `tag_name` from a github [release][] event |
 
 
-### Outputs
+## Outputs
 
 | Name             | Type    | Description |
 |------------------|---------|-------------|
 | `tag` | `String` | The transformed tag |
 
-### Examples
+## Examples
 
 ### From Release on repo 
 ```yaml
