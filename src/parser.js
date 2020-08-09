@@ -32,9 +32,12 @@ exports.parseTag = (pattern, tag) => {
     if(maj){output = output.replace(/x/ig, major)}
     if(min){output = output.replace(/y/ig, minor)}
     if(fix){output = output.replace(/z/ig, patch)}
-    Tag.tag = `${output}${identifier}${variant}`
-
+    if(identifier){output = `${output}${identifier}`}
+    if(variant){output = `${output}${variant}`}
+    Tag.tag = output
   }
-  core.info(JSON.stringify(Tag))  
+  if(core.isDebug()){
+    core.debug(JSON.stringify(Tag))  
+  }
   return Tag
 }
