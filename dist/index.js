@@ -7360,22 +7360,17 @@ const {parseTag} = __webpack_require__(510)
 try {
   core.debug(JSON.stringify(github.context))
 
-  // get tag-pattern-matcher
-  const pattern = core.getInput('pattern')
-  const inputTag = core.getInput('tag_name')
+  const strategy = core.getInput('pattern')
+  const release = core.getInput('tag_name')
 
-  core.info(`Parsing ${inputTag} with ${pattern} tag for this run`)
+  core.info(`Parsing ${release} with ${strategy} tag for this run`)
 
-  // this will be a function to parse the input against the event payload
-  // to produce a refined tag
   const {error, tag} = parseTag(pattern, inputTag)
   if (error) throw error.message
-  // finally, return output
   core.info(`tag output: ${tag}`)
   core.setOutput("tag", tag)
 
 } catch (error) {
-  // do error handling stuff
   core.error(error)
   core.setFailed(`Tagging Strategy was unable to parse your tag...\n${error}`)
 }

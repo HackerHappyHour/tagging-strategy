@@ -1,5 +1,6 @@
 const s = require('semver')
 const github = require('@actions/github')
+const core = require('@actions/core')
 const {getIdentifier} = require('./utils')
 const {invalidTag, tooManyPatterns} = require('./errors')
 
@@ -34,6 +35,6 @@ exports.parseTag = (pattern, tag) => {
     Tag.tag = `${output}${identifier}${variant}`
 
   }
-
+  core.info(JSON.stringify(Tag))  
   return Tag
 }
