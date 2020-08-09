@@ -64,7 +64,7 @@ name: Dispatcher
 
 on:
   release:
-    types: [published, prereleased, released]
+    types: [prereleased, released]
 
 jobs:
 
