@@ -14,7 +14,7 @@ const stringShouldNotMatch = [
 ]
 
 stringShouldMatch.forEach(pattern => {
-  const tag = parseTag(pattern, '1.0.0-something.2')
+  const {tag, error} = parseTag(pattern, '1.0.0-something.2')
   if (tag.error) console.error(tag.error)
   console.log('tag', tag)
 })

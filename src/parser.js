@@ -48,9 +48,12 @@ exports.parseTag = (pattern, tag) => {
           Tag.version = strategy_tag
           Tag.modifier = prerelease
         }
-        return Tag
+
+        return {
+          ...Tag,
+          tag: `${Tag.version}${Tag.modifier}` 
+        }
       } catch (error) {
-        console.error(error)
         return {error: error}
       }
 
