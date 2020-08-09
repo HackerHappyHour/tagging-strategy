@@ -1,20 +1,14 @@
 const {parseTag} = require('./src/parser')
 
-const stringShouldMatch = [
-  '%X.Y%-foobar',
+const strategies = [
+  '%X.Y.Z%-foobar',
   '%X%-foobar',
   '%X.Y.Z%-foobar',
-  '%X.y.Z%-something',
+  '%X.y.Z%-foobar',
 ]
 
-const stringShouldNotMatch = [
-  '%X.1.Z%',
-  'foo-%X.Y.Z%-bar', 
-  '%X.X%-something'
-]
-
-stringShouldMatch.forEach(pattern => {
-  const tag = parseTag(pattern, '1.0.0-something.2')
+strategies.forEach(pattern => {
+  const tag = parseTag(pattern, '1.0.0-rc2')
   if (tag.error) console.error(tag.error.message)
   console.log('\ntag:', tag)
 })

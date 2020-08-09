@@ -15,19 +15,16 @@ describe('if no delimiters found', ()=>{
     let release = '1.0.0'
     const {invalidTag} = errors
     let {tag, error} = parseTag(strategy, release)
-    console.log('invalidTag: ', invalidTag)
-    console.log('error', error)
-    console.log('tag', tag)
     expect(error).toMatchObject(invalidTag)
   })
 })
 
 describe('if delimiters found', () => {
   const strategies = [
-    ['%X.Y%-camera', '1.0-rc1', '1.0-rc1-camera'],
-    ['%X.Y.Z%-camera', '1.0-rc1', '1.0.0-rc1-camera']
+    ['%X.Y.Z%-camera', '1.0.0-rc1', '1.0.0rc1-camera'],
+    ['%X.Y.Z%-camera', '1.0.0-rc.1', '1.0.0-rc.1-camera']
   ]
-  test.each(strategies)('.parseTag', (strategy, release, expected) => {
+  test.each(strategies)('.parseTag("%s", "%s") expects %s', (strategy, release, expected) => {
     let {tag} = parseTag(strategy, release)
     expect(tag).toMatch(expected)
   })

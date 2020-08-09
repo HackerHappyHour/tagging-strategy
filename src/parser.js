@@ -9,6 +9,7 @@ const errors = {
 const matcher = /(%(?<strategy>(?<major>x?)\.?(?<minor>y?)\.?(?<patch>z?))%)(?<variant>.*)/ig
 
 exports.parseTag = (pattern, tag) => {
+  if(!pattern) throw 'no pattern found'
   if (pattern === 'latest') return {tag: 'latest'}
   if (pattern.indexOf('%') > 2) return {error: errors.tooManyPatterns}
 
@@ -27,21 +28,24 @@ exports.parseTag = (pattern, tag) => {
   const identifier = getIdentifier(parsedTag.prerelease, parsedTag.raw) 
 
   for(let match of matches){
-    const {strategy, variant} = match.groups
+    const {major: maj, minor:min, patch:fix, strategy, variant} = match.groups
     Tag = {
       ...Tag, 
       strategy, 
       variant, 
-      major: match.groups.major, 
-      minor: match.groups.minor, 
-      patch: match.groups.minor, 
-      identifier
+      identifier,
+      maj,
+      min,
+      fix,
+      major: major,
+      minor: minor,
+      patch: patch
     }
-    let strategyTag = strategy
-    if(Tag.major) strategyTag = strategyTag.replace(/x/g, Tag.major)
-    if (Tag.minor) strategyTag = strategyTag.replace(/y/g, Tag.minor)
-    if (Tag.patch) strategyTag = strategyTag.replace(/z/g, Tag.patch)
-    Tag.tag = `${strategyTag}${identifier}${variant}`
+    let output = strategy
+    if(maj){output = output.replace(/x/ig, major)}
+    if(min){output = output.replace(/y/ig, minor)}
+    if(fix){output = output.replace(/z/ig, patch)}
+    Tag.tag = `${output}${identifier}${variant}`
 
   }
 
