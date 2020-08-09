@@ -14,8 +14,12 @@ const stringShouldNotMatch = [
 ]
 
 stringShouldMatch.forEach(pattern => {
-  const {tag, error} = parseTag(pattern, '1.0.0-something.2')
-  if (tag.error) console.error(tag.error)
-  console.log('tag', tag)
+  const {strategy, prerelease, major, minor, patch, error} = parseTag(pattern, '1.0.0-something.2')
+  if (error) console.error(error)
+  console.log(`strategy: ${strategy}`)
+  console.log(`prerelease: ${variant}`)
+  console.log(`major: ${major}`)
+  console.log(`minor: ${minor}`)
+  console.log(`patch: ${patch}\n\n`)
 })
 
