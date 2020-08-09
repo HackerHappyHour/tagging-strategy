@@ -1,39 +1,27 @@
-const {
-  errorInvalidTag, 
-  parseTag, 
-  replacers 
-} = require('./parser')
+const {parseTag} = require('./parser')
+const {invalidTag} = require('./errors')
 
-describe('if no delimiters found', ()=>{
-  test('it accepts "latest"', () => {
-    const tag = parseTag('latest')
-    expect(tag).toMatch('latest')
-  })
+const strategies = [
+  ['%X.Y.Z%-camera', '1.0.0-rc1', '1.0.0-rc1-camera'],
+  ['%X.Y.Z%-camera', '1.0.0-rc.1', '1.0.0-rc.1-camera']
+]
 
-  test.skip('it returns an error if any unparseable alpha chars exist', () => {
-
-  })
+test('it accepts "latest"', () => {
+  const tag = parseTag('latest', '1.0.0')
+  expect(tag).toMatchObject({tag:'latest'})
 })
 
-describe('if delimiters found', () => {
-
-  test('%X.Y%-foobar', () => {
-    const pattern = '%X.Y%-foobar'
-    const output = {
-      strategy_tag: '1.0-foobar'
-    }
-    expect(parseTag(pattern, '1.0.0')).toMatchObject(output)
-    expect(parseTag(pattern, 'v1.0.0-foobarbaz1')).toMatchObject(output)
-
-    // non-strict tags will be coerced to strict tags
-    expect(parseTag(pattern, 'x1.0.0')).toMatchObject(output)
-    expect(parseTag(pattern, 'x1.0.0xyz')).toMatchObject(output)
-    expect(parseTag(pattern, '1')).toMatchObject(output)
-    expect(parseTag(pattern, 'v1')).toMatchObject(output)
-  })
-
-  test.skip('foo-%X.Y.Z%-bar', () => {})
-
+test.each(strategies)(
+  '.parseTag("%s", "%s") returns %s', 
+  (strategy, release, expected) => {
+  let {tag} = parseTag(strategy, release)
+  expect(tag).toMatch(expected)
 })
 
+test.skip('it returns an error if any un-parseable alpha chars exist', () => {
+  let strategy = '%X.1.Z%-foobar'
+  let release = '1.0.0'
+  let {tag, error} = parseTag(strategy, release)
+  expect(error).toMatchObject(invalidTag)
+})
 
