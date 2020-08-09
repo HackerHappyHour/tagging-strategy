@@ -5763,6 +5763,7 @@ exports.Octokit = Octokit;
 
 const s = __webpack_require__(24)
 const github = __webpack_require__(89)
+const core = __webpack_require__(236)
 const {getIdentifier} = __webpack_require__(350)
 const {invalidTag, tooManyPatterns} = __webpack_require__(512)
 
@@ -5797,7 +5798,7 @@ exports.parseTag = (pattern, tag) => {
     Tag.tag = `${output}${identifier}${variant}`
 
   }
-
+  core.info(JSON.stringify(Tag))  
   return Tag
 }
 
