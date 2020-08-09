@@ -26,7 +26,20 @@ exports.parseTag = (pattern, tag) => {
 
   for(let match of matches){
     const {strategy, variant} = match.groups
-    Tag = {...Tag, strategy, variant, major, minor, patch, identifier}
+    Tag = {
+      ...Tag, 
+      strategy, 
+      variant, 
+      major: match.groups.major, 
+      minor: match.groups.minor, 
+      patch: match.groups.minor, 
+      identifier
+    }
+    let strategyTag = strategy
+    if(Tag.major) strategyTag = strategyTag.replace(/x/g, Tag.major)
+    if (Tag.minor) strategyTag = strategyTag.replace(/y/g, Tag.minor)
+    if (Tag.patch) strategyTag = strategyTag.replace(/z/g, Tag.patch)
+    Tag.tag = `${strategyTag}${identifier}${variant}`
 
   }
 
@@ -53,5 +66,4 @@ function identifierRegex(identifier){
   
 }
 
-exports.replacers = replacers
 exports.errorInvalidTag = errorInvalidTag
