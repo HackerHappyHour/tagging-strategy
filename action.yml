@@ -12,5 +12,5 @@ outputs:
   tag:
     description: 'Outputs a tag based on the the strategy for this run'
 runs:
-  using: 'node14'
+  using: 'node12'
   main: 'dist/index.js'
