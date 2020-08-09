@@ -7371,6 +7371,7 @@ try {
   const {error, tag} = parseTag(pattern, inputTag)
   if (error) throw error.message
   // finally, return output
+  core.info(`tag output: ${tag}`)
   core.setOutput("tag", tag)
 
 } catch (error) {
