@@ -1,13 +1,6 @@
 const s = require('semver')
 const github = require('@actions/github')
 
-const delimiter = '%'
-const replacers = {
-  major: 'x',
-  minor: 'y',
-  patch: 'z'
-}
-
 const errorInvalidTag = {error: 'value is not valid or cannot be coerced'}
 const errorTooManyPatterns = {error: 'only one pattern allowed per strategy'}
 
@@ -34,6 +27,7 @@ exports.parseTag = (pattern, tag) => {
   for(let match of matches){
     const {strategy, variant} = match.groups
     Tag = {...Tag, strategy, variant, major, minor, patch, identifier}
+
   }
 
   return Tag
