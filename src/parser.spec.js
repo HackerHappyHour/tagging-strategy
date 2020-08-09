@@ -2,8 +2,12 @@ const {parseTag} = require('./parser')
 const {invalidTag} = require('./errors')
 
 const strategies = [
-  ['%X.Y.Z%-camera', '1.0.0-rc1', '1.0.0-rc1-camera'],
-  ['%X.Y.Z%-camera', '1.0.0-rc.1', '1.0.0-rc.1-camera']
+  ['%X.Y.Z%-foobar', '1.0.0-rc1', '1.0.0-rc1-foobar'],
+  ['%X.Y.Z%-foobar', '1.0.0-rc.1', '1.0.0-rc.1-foobar'],
+  ['%X.Y%-foobar', '1.0.0-rc1', '1.0-rc1-foobar'],
+  ['%X.Y%-foobar', '1.0.0-rc.1', '1.0-rc.1-foobar'],
+  ['%X%-foobar', '1.0.0-rc1', '1-rc1-foobar'],
+  ['%X%-foobar', '1.0.0-rc.1', '1-rc.1-foobar'],
 ]
 
 test('it accepts "latest"', () => {
@@ -24,4 +28,3 @@ test.skip('it returns an error if any un-parseable alpha chars exist', () => {
   let {tag, error} = parseTag(strategy, release)
   expect(error).toMatchObject(invalidTag)
 })
-
