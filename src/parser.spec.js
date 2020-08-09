@@ -16,15 +16,11 @@ describe('if no delimiters found', ()=>{
 })
 
 describe('if delimiters found', () => {
-  const testPatterns = [
-    '%X.Y%-foobar',
-    'foo-%X.Y.Z%-bar',
-    '%X.1.Z%'
-  ]
+
   test('%X.Y%-foobar', () => {
     const pattern = '%X.Y%-foobar'
     const output = {
-      strategy_tag: 'latest'
+      strategy_tag: '1.0-foobar'
     }
     expect(parseTag(pattern, '1.0.0')).toMatchObject(output)
     expect(parseTag(pattern, 'v1.0.0-foobarbaz1')).toMatchObject(output)
