@@ -7,12 +7,32 @@ using semver, and other common docker tagging strategies as inputs.
   - [Usage](#usage)
     - [Inputs](#inputs)
     - [Outputs](#outputs)
+    - [Examples](#examples)
+    - [From Release on repo](#from-release-on-repo)
+    - [From Release on External Repository](#from-release-on-external-repository)
 
 ## Usage
 
+### Inputs
+
+| Name             | Type    | Required   | Description                        |
+|------------------|---------|------------|------------------------------------|
+| `pattern`        | [Strategy](#strategies) | yes | The strategy to parse the tag paylod with |
+| `tag_name` | String | yes | A `tag_name` from a github [release][] event |
+
+
+### Outputs
+
+| Name             | Type    | Description |
+|------------------|---------|-------------|
+| `tag` | `String` | The transformed tag |
+
+### Examples
+
+### From Release on repo 
 ```yaml
 jobs:
-  docker_image:
+  myReleaseExample:
     runs-on: ubuntu-latest
     stategy:
       matrix:
@@ -20,7 +40,6 @@ jobs:
 
     steps:
     # checkout steps etc...
-
     # Image Tagger
     - name: Image Tag Strategy
       id: tagging
@@ -36,21 +55,12 @@ jobs:
     - name: Build
       run: |
         docker buildx build -t ${{ github.repo }}:${{ steps.tagging.outputs.tag }} .
+  
 ```
 
-### Inputs
+### From Release on External Repository 
 
-| Name             | Type    | Required   | Description                        |
-|------------------|---------|------------|------------------------------------|
-| `pattern`        | [Strategy](#strategies) | yes | The strategy to parse the tag paylod with |
-| `tag_name` | String | yes | A `tag_name` from a github [release][] event |
-see [HackerHappyHour/test-repo-dispatcher/.github/workflows/dispatches.yml][dispatch_example] for an example on how to send from another repo |
-
-### Outputs
-
-| Name             | Type    | Description |
-|------------------|---------|-------------|
-| `tag` | `String` | The transformed tag |
+See [HackerHappyHour/test-repo-dispatcher/.github/workflows/dispatches.yml][dispatch_example] for an example on how to send from another repo, and [.github/workflows/release_dispatch.yml](/.github/workflows/release_dispatch.yml) to see how to receive from that event.
 
 [dispatch_example]: https://github.com/HackerHappyHour/test-repo-dispatcher/blob/master/.github/workflows/dispatches.yml 
 [release]: https://docs.github.com/en/actions/reference/events-that-trigger-workflows#release
