@@ -19,6 +19,6 @@ jobs:
         uses: ./
         with:
           pattern: ${{ matrix.image-tagging-strategy }}
-          tag_name: ${{ github.event.client_payload.tag }}
+          tag_name: ${{ github.event.client_payload.tag_name }}
       - name: Use Tag
         run: echo ${{ steps.tagging.outputs.tag }}
