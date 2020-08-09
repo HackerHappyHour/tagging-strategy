@@ -5744,35 +5744,56 @@ exports.Octokit = Octokit;
 const s = __webpack_require__(24)
 const github = __webpack_require__(89)
 
-const delimiter = '%'
-const replacers = {
-  X: 'major',
-  Y: 'minor',
-  Z: 'patch'
-}
-
 const errorInvalidTag = {error: 'value is not valid or cannot be coerced'}
+const errorTooManyPatterns = {error: 'only one pattern allowed per strategy'}
 
-exports.parseTag = (strategy, tag) => {
-  if (strategy === 'latest') return 'latest'
+const matcher = /(%(?<strategy>(?<major>x?)\.?(?<minor>y?)\.?(?<patch>z?))%)(?<variant>.*)/ig
 
-  try {
+exports.parseTag = (pattern, tag) => {
+  if (pattern === 'latest') return {tag: 'latest'}
+  if (pattern.indexOf('%') > 2) {error: errorTooManyPatterns}
+
+  let Tag = {}
+  let matches = pattern.matchAll(matcher)
+
     // if 'tag' is valid, attempt to parse it
-    // otherwise error: value is not valid or cannot be coerced
-    var parsedTag = s.parse(tag, {includePrerelease: true})
-    if (!parsedTag){
-      parsedTag = s.parse(s.valid(s.coerce(tag)))
-      if (!parsedTag) throw errorInvalidTag.error
-    } 
+  // otherwise error: value is not valid or cannot be coerced
+  var parsedTag = s.parse(tag, {includePrerelease: true})
+  if (!parsedTag){
+    parsedTag = s.parse(s.valid(s.coerce(tag)))
+    if (!parsedTag) return errorInvalidTag.error
+  } 
 
-    // parse away!
-    // find X/Y/Z between %%'s or if only alpha's in string are X/Y/Z
-    return {strategy_tag: 'latest'}
+  const {major, minor, patch} = parsedTag
+  const identifier = getIdentifier(parsedTag.prerelease, parsedTag.raw) 
 
-  } catch (error) {
-    return {error: error}
+  for(let match of matches){
+    const {strategy, variant} = match.groups
+    Tag = {...Tag, strategy, variant, major, minor, patch, identifier}
+
   }
 
+  return Tag
+}
+
+function getIdentifier(identifier, raw){
+  if(!identifier) return ''
+  switch (identifier.length){
+    case 1:
+      return identifier
+      break;
+    default:
+      return raw.slice(
+        raw.search(identifierRegex(identifier)),
+        raw.length
+      )
+  }
+}
+
+function identifierRegex(identifier){
+  var replace = '\\W+(' + `${identifier[0]}`+ '.*' + `${identifier[identifier.length - 1]}`+')$'
+  return new RegExp(replace)
+  
 }
 
 exports.replacers = replacers

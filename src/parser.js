@@ -1,13 +1,6 @@
 const s = require('semver')
 const github = require('@actions/github')
 
-const delimiter = '%'
-const replacers = {
-  major: 'x',
-  minor: 'y',
-  patch: 'z'
-}
-
 const errorInvalidTag = {error: 'value is not valid or cannot be coerced'}
 const errorTooManyPatterns = {error: 'only one pattern allowed per strategy'}
 
@@ -28,13 +21,36 @@ exports.parseTag = (pattern, tag) => {
     if (!parsedTag) return errorInvalidTag.error
   } 
 
+  const {major, minor, patch} = parsedTag
+  const identifier = getIdentifier(parsedTag.prerelease, parsedTag.raw) 
+
   for(let match of matches){
     const {strategy, variant} = match.groups
-    const {major, minor, patch} = parsedTag
-    Tag = {...Tag, strategy, variant, major, minor, patch}
+    Tag = {...Tag, strategy, variant, major, minor, patch, identifier}
+
   }
 
   return Tag
+}
+
+function getIdentifier(identifier, raw){
+  if(!identifier) return ''
+  switch (identifier.length){
+    case 1:
+      return identifier
+      break;
+    default:
+      return raw.slice(
+        raw.search(identifierRegex(identifier)),
+        raw.length
+      )
+  }
+}
+
+function identifierRegex(identifier){
+  var replace = '\\W+(' + `${identifier[0]}`+ '.*' + `${identifier[identifier.length - 1]}`+')$'
+  return new RegExp(replace)
+  
 }
 
 exports.replacers = replacers
