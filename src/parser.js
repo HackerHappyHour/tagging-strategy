@@ -1,14 +1,16 @@
 const s = require('semver')
 const github = require('@actions/github')
 
-const errorInvalidTag = {error: 'value is not valid or cannot be coerced'}
-const errorTooManyPatterns = {error: 'only one pattern allowed per strategy'}
+const errors = {
+  invalidTag: {message: 'tag_name value is not valid or cannot be coerced'},
+  tooManyPatterns: {message: 'only one pattern allowed per strategy'}
+}
 
 const matcher = /(%(?<strategy>(?<major>x?)\.?(?<minor>y?)\.?(?<patch>z?))%)(?<variant>.*)/ig
 
 exports.parseTag = (pattern, tag) => {
   if (pattern === 'latest') return {tag: 'latest'}
-  if (pattern.indexOf('%') > 2) {error: errorTooManyPatterns}
+  if (pattern.indexOf('%') > 2) return {error: errors.tooManyPatterns}
 
   let Tag = {}
   let matches = pattern.matchAll(matcher)
@@ -18,7 +20,7 @@ exports.parseTag = (pattern, tag) => {
   var parsedTag = s.parse(tag, {includePrerelease: true})
   if (!parsedTag){
     parsedTag = s.parse(s.valid(s.coerce(tag)))
-    if (!parsedTag) return errorInvalidTag.error
+    if (!parsedTag) return {error: errors.invalidTag}
   } 
 
   const {major, minor, patch} = parsedTag
@@ -66,4 +68,4 @@ function identifierRegex(identifier){
   
 }
 
-exports.errorInvalidTag = errorInvalidTag
+exports.errors = errors
