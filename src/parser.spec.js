@@ -12,7 +12,7 @@ test('it accepts "latest"', () => {
 })
 
 test.each(strategies)(
-  '.parseTag("%s", "%s") expects %s', 
+  '.parseTag("%s", "%s") returns %s', 
   (strategy, release, expected) => {
   let {tag} = parseTag(strategy, release)
   expect(tag).toMatch(expected)
