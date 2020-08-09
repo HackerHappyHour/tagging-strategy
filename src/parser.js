@@ -3,15 +3,19 @@ const github = require('@actions/github')
 
 const delimiter = '%'
 const replacers = {
-  X: 'major',
-  Y: 'minor',
-  Z: 'patch'
+  major: 'x',
+  minor: 'y',
+  patch: 'z'
 }
 
 const errorInvalidTag = {error: 'value is not valid or cannot be coerced'}
 
+const matcher = /%(?<major>x?)\.?(?<minor>y?)\.?(?<patch>z?)%/ig
+
 exports.parseTag = (strategy, tag) => {
   if (strategy === 'latest') return 'latest'
+
+  let matches = strategy.matchAll(matcher)
 
   try {
     // if 'tag' is valid, attempt to parse it
