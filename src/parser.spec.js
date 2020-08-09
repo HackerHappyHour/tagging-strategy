@@ -1,8 +1,5 @@
-const {
-  errors,
-  parseTag, 
-  replacers 
-} = require('./parser')
+const {parseTag} = require('./parser')
+const {invalidTag} = require('./errors')
 
 const strategies = [
   ['%X.Y.Z%-camera', '1.0.0-rc1', '1.0.0-rc1-camera'],
@@ -24,7 +21,6 @@ test.each(strategies)(
 test.skip('it returns an error if any un-parseable alpha chars exist', () => {
   let strategy = '%X.1.Z%-foobar'
   let release = '1.0.0'
-  const {invalidTag} = errors
   let {tag, error} = parseTag(strategy, release)
   expect(error).toMatchObject(invalidTag)
 })
