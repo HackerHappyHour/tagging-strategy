@@ -57,7 +57,60 @@ jobs:
 
 ### From Release on External Repository 
 
-See [HackerHappyHour/test-repo-dispatcher/.github/workflows/dispatches.yml][dispatch_example] for an example on how to send from another repo, and [.github/workflows/release_dispatch.yml](/.github/workflows/release_dispatch.yml) to see how to receive from that event.
+Setup a `repository_dispatch` job on the external repository:
 
-[dispatch_example]: https://github.com/HackerHappyHour/test-repo-dispatcher/blob/master/.github/workflows/dispatches.yml 
+```yaml
+name: Dispatcher
+
+on:
+  release:
+    types: [published, prereleased, released]
+
+jobs:
+
+  dispatch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: dispatch
+        id: dispatch
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.OCTOPRINT_DOCKER_DISPATCH_TOKEN }}
+          repository: HackerHappyHour/tagging-strategy
+          event-type: 'release'
+          client-payload: '{"tag_name": "${{ github.event.release.tag_name }}"}'
+
+```
+
+Then set up your job in your repo performing the tagging:
+
+```yaml
+name: Release Dispatch
+
+on:
+  repository_dispatch:
+    types: [release]
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image-tagging-strategy: ['%X%-foobar', '%X.Y%-foobar', '%X.Y.Z%-foobar']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: tagging
+        id: tagging
+        uses: ./
+        with:
+          pattern: "${{ matrix.image-tagging-strategy }}"
+          tag_name: "${{ github.event.client_payload.tag_name }}"
+      - name: Use Tag
+        run: echo ${{ steps.tagging.outputs.tag }}
+
+```
+
 [release]: https://docs.github.com/en/actions/reference/events-that-trigger-workflows#release
