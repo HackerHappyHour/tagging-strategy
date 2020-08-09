@@ -7,13 +7,13 @@ try {
 
   // get tag-pattern-matcher
   const pattern = core.getInput('pattern')
-  const inputTag = core.getInput('tag')
+  const inputTag = core.getInput('tag_name')
 
-  core.info(`Parsing ${tag} with ${pattern} tag for this run`)
+  core.info(`Parsing ${inputTag} with ${pattern} tag for this run`)
 
   // this will be a function to parse the input against the event payload
   // to produce a refined tag
-  const {error, tag} = parseTag(pattern, tag)
+  const {error, tag} = parseTag(pattern, inputTag)
   if (error) throw error.message
   // finally, return output
   core.setOutput("tag", tag)
