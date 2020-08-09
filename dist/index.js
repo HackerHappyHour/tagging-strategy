@@ -7366,7 +7366,7 @@ try {
 
   core.info(`Parsing ${release} with ${strategy} tag for this run`)
 
-  const {error, tag} = parseTag(pattern, inputTag)
+  const {error, tag} = parseTag(strategy, release)
   if (error) throw error.message
   core.info(`tag output: ${tag}`)
   core.setOutput("tag", tag)
