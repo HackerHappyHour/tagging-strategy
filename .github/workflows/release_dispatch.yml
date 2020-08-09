@@ -2,18 +2,23 @@ name: Release Dispatch
 
 on:
   repository_dispatch:
-    types: [release, prerelease]
+    types: [release]
 
 jobs:
   debug:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image-tagging-strategy: ['%X%-foobar', '%X.Y%-foobar', '%X.Y.Z%-foobar']
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: tagging
-        id: debug
+        id: tagging
         uses: ./
         with:
-          pattern: 'X.Y.Z'
+          pattern: ${{ matrix.image-tagging-strategy }}
           tag_name: ${{ github.event.client_payload.tag }}
+      - name: Use Tag
+        run: echo ${{ steps.tagging.outputs.tag }}
