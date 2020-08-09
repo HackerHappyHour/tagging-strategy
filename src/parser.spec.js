@@ -8,6 +8,7 @@ const strategies = [
   ['%X.Y%-foobar', '1.0.0-rc.1', '1.0-rc.1-foobar'],
   ['%X%-foobar', '1.0.0-rc1', '1-rc1-foobar'],
   ['%X%-foobar', '1.0.0-rc.1', '1-rc.1-foobar'],
+  ['%X%-foobar', '1.0.0', '1-foobar']
 ]
 
 test('it accepts "latest"', () => {
