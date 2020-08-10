@@ -1,11 +1,15 @@
 # Tagging Strategy
 
-A github image for easily producing a matrix of docker image tags based
+A github action for easily producing a matrix of docker image tags based
 using semver, and other common docker tagging strategies as inputs.
 
 - [Tagging Strategy](#tagging-strategy)
   - [Inputs](#inputs)
   - [Outputs](#outputs)
+    - [Strategies](#strategies)
+      - [Pattern](#pattern)
+      - [Prerelease](#prerelease)
+      - [Variant](#variant)
   - [Examples](#examples)
     - [From Release on repo](#from-release-on-repo)
     - [From Release on External Repository](#from-release-on-external-repository)
@@ -23,6 +27,60 @@ using semver, and other common docker tagging strategies as inputs.
 | Name             | Type    | Description |
 |------------------|---------|-------------|
 | `tag` | `String` | The transformed tag |
+
+### Strategies
+
+The forumula for the output tag is: `pattern`+`<prerelease>`+`<variant>`
+
+#### Pattern
+
+A strategy is comprised of a valid or coercable semver pattern, 
+using `X`, `Y`, and `Z`, as well as the word `latest`.
+
+Valid pattern examples include:
+
+```
+latest
+%X%
+%Z%
+%X.Y.Z%
+%X.Y%
+```
+
+These can be in any order, but only `X`, `Y`, and `Z` will be parsed at this time.
+
+`latest` - returns `latest`
+`X` - returns Major version
+`Y` - returns Minor version
+`Z` - returns Patch version
+
+
+#### Prerelease
+
+A `prerelease` is parsed from the `tag_name` from your release event. This string
+will match anything that follows the identified version number from the tag.
+
+For example when created a release tag in github using the examples below,
+the highlighted sections indicate what would be returned as the `prerelease` value.
+
+1.0.0`-beta1`
+1.0.0`-rc.1`
+1.0.0`-build-3467821`
+
+#### Variant
+
+
+The `variant` is any modifier you want to add to the tag. This can be used
+to produce a matrix of tags that have the same version, but multiple variants.
+
+Common uses are to use `variant` to define features or operating systems for each tag.
+
+Examples of using a variant:
+
+```
+%X%-ubuntu => given 1.0.0 returns 1-ubuntu
+%X.Y.Z%-ubuntu => given 1.0.0-rc.1 returns 1.0.0-rc1-ubuntu
+```
 
 ## Examples
 
