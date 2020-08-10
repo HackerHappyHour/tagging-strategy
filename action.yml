@@ -1,7 +1,8 @@
 name: 'Tagging Strategy'
 description: 'Easy Tag creating for docker tagging strategies'
-icon: check-square
-color: orange
+branding:
+  icon: 'check-square'
+  color: 'orange'
 inputs:
   pattern:
     description: 'The tagging strategy for this run'
