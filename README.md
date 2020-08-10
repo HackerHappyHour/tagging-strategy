@@ -162,7 +162,7 @@ jobs:
         uses: actions/checkout@v2
       - name: tagging
         id: tagging
-        uses: ./
+        uses: HackerHappyHour/tagging-strategy@v1
         with:
           pattern: "${{ matrix.image-tagging-strategy }}"
           tag_name: "${{ github.event.client_payload.tag_name }}"
