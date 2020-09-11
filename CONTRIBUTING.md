@@ -16,7 +16,7 @@ be coming soon. See the [build](#build) instructions below for details on how to
 git clone <your fork>
 cd tagging-strategy
 git checkout -b feature-my-feature-or-fix-description master
-npm i && npm i -g @zeit/ncc
+npm i && npm i -g @vercel/ncc
 ```
 You are now ready to make your changes, and then procede to [build](#build) before
 submitting your contributing
