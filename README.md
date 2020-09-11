@@ -1,7 +1,7 @@
 # Tagging Strategy
 
 A github action for easily creating a whole bunch of tags from a single Dockerfile by leveraging
-using semver, and other common docker tagging strategies as inputs.
+semver-compatible templating definitions, and other common docker tagging strategies as inputs.
 
 - [Tagging Strategy](#tagging-strategy)
   - [Inputs](#inputs)
