@@ -41,6 +41,7 @@ Valid pattern examples include:
 
 ```
 latest
+latest*
 %X%
 %Z%
 %X.Y.Z%
@@ -155,7 +156,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        image-tagging-strategy: ['%X%-foobar', '%X.Y%-foobar', '%X.Y.Z%-foobar']
+        image-tagging-strategy: ['latest', 'latest-foobar', %X%-foobar', '%X.Y%-foobar', '%X.Y.Z%-foobar']
 
     steps:
       - name: Checkout

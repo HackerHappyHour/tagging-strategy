@@ -4,9 +4,11 @@ const {getIdentifier} = require('./utils')
 const {invalidTag, tooManyPatterns} = require('./errors')
 
 const matcher = /(%(?<strategy>(?<major>x?)\.?(?<minor>y?)\.?(?<patch>z?))%)(?<variant>.*)/ig
+const latest = /^latest*/
 
 exports.parseTag = (pattern, tag) => {
-  if (pattern === 'latest') return {tag: 'latest'}
+  // if pattern starts with 'latest' return entire pattern
+  if (latest.test(pattern)) return {tag: pattern}
   if (pattern.indexOf('%') > 2) return {error: tooManyPatterns}
 
   let Tag = {}
