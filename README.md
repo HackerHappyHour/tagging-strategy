@@ -1,6 +1,6 @@
 # Tagging Strategy
 
-A github action for easily producing a matrix of docker image tags based
+A github action for easily creating a whole bunch of tags from a single Dockerfile by leveraging
 using semver, and other common docker tagging strategies as inputs.
 
 - [Tagging Strategy](#tagging-strategy)
@@ -46,15 +46,16 @@ latest*
 %Z%
 %X.Y.Z%
 %X.Y%
+%X%-foobar 
+%X.Y.Z%-foobar-baz
 ```
 
-These can be in any order, but only `X`, `Y`, and `Z` will be parsed at this time.
+Sections of the pattern are denoted using `%`. Currently only `X`, `Y`, and `Z` will be translated.
 
-`latest` - returns `latest`
-`X` - returns Major version
-`Y` - returns Minor version
-`Z` - returns Patch version
-
+`latest` - returns `latest`  
+`X` - returns Major version  
+`Y` - returns Minor version  
+`Z` - returns Patch version  
 
 #### Prerelease
 
@@ -64,12 +65,11 @@ will match anything that follows the identified version number from the tag.
 For example when created a release tag in github using the examples below,
 the highlighted sections indicate what would be returned as the `prerelease` value.
 
-1.0.0`-beta1`
-1.0.0`-rc.1`
-1.0.0`-build-3467821`
+1.0.0`-beta1`  
+1.0.0`-rc.1`  
+1.0.0`-build-3467821`  
 
 #### Variant
-
 
 The `variant` is any modifier you want to add to the tag. This can be used
 to produce a matrix of tags that have the same version, but multiple variants.
