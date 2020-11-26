@@ -2,35 +2,28 @@ module.exports =
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 4696:
+/***/ 8433:
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
 
-const core = __webpack_require__(5330)
-const github = __webpack_require__(2943)
-const {parseTag} = __webpack_require__(6964)
+const core = __webpack_require__(3821)
+const github = __webpack_require__(2502)
+const {taggingStrategy} = __webpack_require__(5454)
+
+const inputTags = getInput('tags')
+const tagName = core.getInput('tag_name')
+const latest = core.getInput('latest')
 
 try {
-  core.debug(JSON.stringify(github.context))
-
-  const strategy = core.getInput('pattern')
-  const release = core.getInput('tag_name')
-
-  core.info(`Parsing ${release} with ${strategy} tag for this run`)
-
-  const {error, tag} = parseTag(strategy, release)
-  if (error) throw error.message
-  core.info(`tag output: ${tag}`)
-  core.setOutput("tag", tag)
-
+  core.setOutput('tags', taggingStrategy({inputTags, tagName, latest}))
 } catch (error) {
   core.error(error)
-  core.setFailed(`Tagging Strategy was unable to parse your tag...\n${error}`)
+  core.setFailed(`tagging-strategy was unable to parse your tags...\n${error}`)
 }
 
 
 /***/ }),
 
-/***/ 6470:
+/***/ 1757:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -44,6 +37,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const os = __importStar(__webpack_require__(2087));
+const utils_1 = __webpack_require__(9557);
 /**
  * Commands
  *
@@ -97,28 +91,14 @@ class Command {
         return cmdStr;
     }
 }
-/**
- * Sanitizes an input into a string so it can be passed into issueCommand safely
- * @param input input to sanitize into a string
- */
-function toCommandValue(input) {
-    if (input === null || input === undefined) {
-        return '';
-    }
-    else if (typeof input === 'string' || input instanceof String) {
-        return input;
-    }
-    return JSON.stringify(input);
-}
-exports.toCommandValue = toCommandValue;
 function escapeData(s) {
-    return toCommandValue(s)
+    return utils_1.toCommandValue(s)
         .replace(/%/g, '%25')
         .replace(/\r/g, '%0D')
         .replace(/\n/g, '%0A');
 }
 function escapeProperty(s) {
-    return toCommandValue(s)
+    return utils_1.toCommandValue(s)
         .replace(/%/g, '%25')
         .replace(/\r/g, '%0D')
         .replace(/\n/g, '%0A')
@@ -129,7 +109,7 @@ function escapeProperty(s) {
 
 /***/ }),
 
-/***/ 5330:
+/***/ 3821:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -151,7 +131,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const command_1 = __webpack_require__(6470);
+const command_1 = __webpack_require__(1757);
+const file_command_1 = __webpack_require__(7895);
+const utils_1 = __webpack_require__(9557);
 const os = __importStar(__webpack_require__(2087));
 const path = __importStar(__webpack_require__(5622));
 /**
@@ -178,9 +160,17 @@ var ExitCode;
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function exportVariable(name, val) {
-    const convertedVal = command_1.toCommandValue(val);
+    const convertedVal = utils_1.toCommandValue(val);
     process.env[name] = convertedVal;
-    command_1.issueCommand('set-env', { name }, convertedVal);
+    const filePath = process.env['GITHUB_ENV'] || '';
+    if (filePath) {
+        const delimiter = '_GitHubActionsFileCommandDelimeter_';
+        const commandValue = `${name}<<${delimiter}${os.EOL}${convertedVal}${os.EOL}${delimiter}`;
+        file_command_1.issueCommand('ENV', commandValue);
+    }
+    else {
+        command_1.issueCommand('set-env', { name }, convertedVal);
+    }
 }
 exports.exportVariable = exportVariable;
 /**
@@ -196,7 +186,13 @@ exports.setSecret = setSecret;
  * @param inputPath
  */
 function addPath(inputPath) {
-    command_1.issueCommand('add-path', {}, inputPath);
+    const filePath = process.env['GITHUB_PATH'] || '';
+    if (filePath) {
+        file_command_1.issueCommand('PATH', inputPath);
+    }
+    else {
+        command_1.issueCommand('add-path', {}, inputPath);
+    }
     process.env['PATH'] = `${inputPath}${path.delimiter}${process.env['PATH']}`;
 }
 exports.addPath = addPath;
@@ -358,7 +354,69 @@ exports.getState = getState;
 
 /***/ }),
 
-/***/ 5009:
+/***/ 7895:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+// For internal use, subject to change.
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+// We use any as a valid input type
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const fs = __importStar(__webpack_require__(5747));
+const os = __importStar(__webpack_require__(2087));
+const utils_1 = __webpack_require__(9557);
+function issueCommand(command, message) {
+    const filePath = process.env[`GITHUB_${command}`];
+    if (!filePath) {
+        throw new Error(`Unable to find environment variable for file command ${command}`);
+    }
+    if (!fs.existsSync(filePath)) {
+        throw new Error(`Missing file at path: ${filePath}`);
+    }
+    fs.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os.EOL}`, {
+        encoding: 'utf8'
+    });
+}
+exports.issueCommand = issueCommand;
+//# sourceMappingURL=file-command.js.map
+
+/***/ }),
+
+/***/ 9557:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+// We use any as a valid input type
+/* eslint-disable @typescript-eslint/no-explicit-any */
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+/**
+ * Sanitizes an input into a string so it can be passed into issueCommand safely
+ * @param input input to sanitize into a string
+ */
+function toCommandValue(input) {
+    if (input === null || input === undefined) {
+        return '';
+    }
+    else if (typeof input === 'string' || input instanceof String) {
+        return input;
+    }
+    return JSON.stringify(input);
+}
+exports.toCommandValue = toCommandValue;
+//# sourceMappingURL=utils.js.map
+
+/***/ }),
+
+/***/ 4577:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
@@ -415,7 +473,7 @@ exports.Context = Context;
 
 /***/ }),
 
-/***/ 2943:
+/***/ 2502:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -441,8 +499,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getOctokit = exports.context = void 0;
-const Context = __importStar(__webpack_require__(5009));
-const utils_1 = __webpack_require__(3149);
+const Context = __importStar(__webpack_require__(4577));
+const utils_1 = __webpack_require__(2002);
 exports.context = new Context.Context();
 /**
  * Returns a hydrated octokit ready to use for GitHub Actions
@@ -458,7 +516,7 @@ exports.getOctokit = getOctokit;
 
 /***/ }),
 
-/***/ 2084:
+/***/ 661:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -484,7 +542,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getApiBaseUrl = exports.getProxyAgent = exports.getAuthString = void 0;
-const httpClient = __importStar(__webpack_require__(4116));
+const httpClient = __importStar(__webpack_require__(2828));
 function getAuthString(token, options) {
     if (!token && !options.auth) {
         throw new Error('Parameter token or opts.auth is required');
@@ -508,7 +566,7 @@ exports.getApiBaseUrl = getApiBaseUrl;
 
 /***/ }),
 
-/***/ 3149:
+/***/ 2002:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -534,12 +592,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getOctokitOptions = exports.GitHub = exports.context = void 0;
-const Context = __importStar(__webpack_require__(5009));
-const Utils = __importStar(__webpack_require__(2084));
+const Context = __importStar(__webpack_require__(4577));
+const Utils = __importStar(__webpack_require__(661));
 // octokit + plugins
-const core_1 = __webpack_require__(8954);
-const plugin_rest_endpoint_methods_1 = __webpack_require__(4355);
-const plugin_paginate_rest_1 = __webpack_require__(5609);
+const core_1 = __webpack_require__(3234);
+const plugin_rest_endpoint_methods_1 = __webpack_require__(35);
+const plugin_paginate_rest_1 = __webpack_require__(5700);
 exports.context = new Context.Context();
 const baseUrl = Utils.getApiBaseUrl();
 const defaults = {
@@ -569,16 +627,15 @@ exports.getOctokitOptions = getOctokitOptions;
 
 /***/ }),
 
-/***/ 4116:
+/***/ 2828:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const url = __webpack_require__(8835);
 const http = __webpack_require__(8605);
 const https = __webpack_require__(7211);
-const pm = __webpack_require__(32);
+const pm = __webpack_require__(8632);
 let tunnel;
 var HttpCodes;
 (function (HttpCodes) {
@@ -624,7 +681,7 @@ var MediaTypes;
  * @param serverUrl  The server URL where the request will be sent. For example, https://api.github.com
  */
 function getProxyUrl(serverUrl) {
-    let proxyUrl = pm.getProxyUrl(url.parse(serverUrl));
+    let proxyUrl = pm.getProxyUrl(new URL(serverUrl));
     return proxyUrl ? proxyUrl.href : '';
 }
 exports.getProxyUrl = getProxyUrl;
@@ -643,6 +700,15 @@ const HttpResponseRetryCodes = [
 const RetryableHttpVerbs = ['OPTIONS', 'GET', 'DELETE', 'HEAD'];
 const ExponentialBackoffCeiling = 10;
 const ExponentialBackoffTimeSlice = 5;
+class HttpClientError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.name = 'HttpClientError';
+        this.statusCode = statusCode;
+        Object.setPrototypeOf(this, HttpClientError.prototype);
+    }
+}
+exports.HttpClientError = HttpClientError;
 class HttpClientResponse {
     constructor(message) {
         this.message = message;
@@ -661,7 +727,7 @@ class HttpClientResponse {
 }
 exports.HttpClientResponse = HttpClientResponse;
 function isHttps(requestUrl) {
-    let parsedUrl = url.parse(requestUrl);
+    let parsedUrl = new URL(requestUrl);
     return parsedUrl.protocol === 'https:';
 }
 exports.isHttps = isHttps;
@@ -766,7 +832,7 @@ class HttpClient {
         if (this._disposed) {
             throw new Error('Client has already been disposed.');
         }
-        let parsedUrl = url.parse(requestUrl);
+        let parsedUrl = new URL(requestUrl);
         let info = this._prepareRequest(verb, parsedUrl, headers);
         // Only perform retries on reads since writes may not be idempotent.
         let maxTries = this._allowRetries && RetryableHttpVerbs.indexOf(verb) != -1
@@ -805,7 +871,7 @@ class HttpClient {
                     // if there's no location to redirect to, we won't
                     break;
                 }
-                let parsedRedirectUrl = url.parse(redirectUrl);
+                let parsedRedirectUrl = new URL(redirectUrl);
                 if (parsedUrl.protocol == 'https:' &&
                     parsedUrl.protocol != parsedRedirectUrl.protocol &&
                     !this._allowRedirectDowngrade) {
@@ -921,7 +987,7 @@ class HttpClient {
      * @param serverUrl  The server URL where the request will be sent. For example, https://api.github.com
      */
     getAgent(serverUrl) {
-        let parsedUrl = url.parse(serverUrl);
+        let parsedUrl = new URL(serverUrl);
         return this._getAgent(parsedUrl);
     }
     _prepareRequest(method, requestUrl, headers) {
@@ -988,13 +1054,13 @@ class HttpClient {
         if (useProxy) {
             // If using proxy, need tunnel
             if (!tunnel) {
-                tunnel = __webpack_require__(748);
+                tunnel = __webpack_require__(5220);
             }
             const agentOptions = {
                 maxSockets: maxSockets,
                 keepAlive: this._keepAlive,
                 proxy: {
-                    proxyAuth: proxyUrl.auth,
+                    proxyAuth: `${proxyUrl.username}:${proxyUrl.password}`,
                     host: proxyUrl.hostname,
                     port: proxyUrl.port
                 }
@@ -1089,12 +1155,8 @@ class HttpClient {
                 else {
                     msg = 'Failed request: (' + statusCode + ')';
                 }
-                let err = new Error(msg);
-                // attach statusCode and body obj (if available) to the error object
-                err['statusCode'] = statusCode;
-                if (response.result) {
-                    err['result'] = response.result;
-                }
+                let err = new HttpClientError(msg, statusCode);
+                err.result = response.result;
                 reject(err);
             }
             else {
@@ -1108,13 +1170,12 @@ exports.HttpClient = HttpClient;
 
 /***/ }),
 
-/***/ 32:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/***/ 8632:
+/***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const url = __webpack_require__(8835);
 function getProxyUrl(reqUrl) {
     let usingSsl = reqUrl.protocol === 'https:';
     let proxyUrl;
@@ -1129,7 +1190,7 @@ function getProxyUrl(reqUrl) {
         proxyVar = process.env['http_proxy'] || process.env['HTTP_PROXY'];
     }
     if (proxyVar) {
-        proxyUrl = url.parse(proxyVar);
+        proxyUrl = new URL(proxyVar);
     }
     return proxyUrl;
 }
@@ -1174,7 +1235,7 @@ exports.checkBypass = checkBypass;
 
 /***/ }),
 
-/***/ 1370:
+/***/ 3973:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -1231,7 +1292,7 @@ exports.createTokenAuth = createTokenAuth;
 
 /***/ }),
 
-/***/ 8954:
+/***/ 3234:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
@@ -1239,62 +1300,49 @@ exports.createTokenAuth = createTokenAuth;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-var universalUserAgent = __webpack_require__(2066);
-var beforeAfterHook = __webpack_require__(1410);
-var request = __webpack_require__(8277);
-var graphql = __webpack_require__(9202);
-var authToken = __webpack_require__(1370);
+var universalUserAgent = __webpack_require__(6924);
+var beforeAfterHook = __webpack_require__(5146);
+var request = __webpack_require__(7154);
+var graphql = __webpack_require__(3391);
+var authToken = __webpack_require__(3973);
 
-function _defineProperty(obj, key, value) {
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
+function _objectWithoutPropertiesLoose(source, excluded) {
+  if (source == null) return {};
+  var target = {};
+  var sourceKeys = Object.keys(source);
+  var key, i;
+
+  for (i = 0; i < sourceKeys.length; i++) {
+    key = sourceKeys[i];
+    if (excluded.indexOf(key) >= 0) continue;
+    target[key] = source[key];
   }
 
-  return obj;
+  return target;
 }
 
-function ownKeys(object, enumerableOnly) {
-  var keys = Object.keys(object);
+function _objectWithoutProperties(source, excluded) {
+  if (source == null) return {};
+
+  var target = _objectWithoutPropertiesLoose(source, excluded);
+
+  var key, i;
 
   if (Object.getOwnPropertySymbols) {
-    var symbols = Object.getOwnPropertySymbols(object);
-    if (enumerableOnly) symbols = symbols.filter(function (sym) {
-      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
-    });
-    keys.push.apply(keys, symbols);
-  }
+    var sourceSymbolKeys = Object.getOwnPropertySymbols(source);
 
-  return keys;
-}
-
-function _objectSpread2(target) {
-  for (var i = 1; i < arguments.length; i++) {
-    var source = arguments[i] != null ? arguments[i] : {};
-
-    if (i % 2) {
-      ownKeys(Object(source), true).forEach(function (key) {
-        _defineProperty(target, key, source[key]);
-      });
-    } else if (Object.getOwnPropertyDescriptors) {
-      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
-    } else {
-      ownKeys(Object(source)).forEach(function (key) {
-        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
-      });
+    for (i = 0; i < sourceSymbolKeys.length; i++) {
+      key = sourceSymbolKeys[i];
+      if (excluded.indexOf(key) >= 0) continue;
+      if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;
+      target[key] = source[key];
     }
   }
 
   return target;
 }
 
-const VERSION = "3.1.2";
+const VERSION = "3.2.1";
 
 class Octokit {
   constructor(options = {}) {
@@ -1326,9 +1374,7 @@ class Octokit {
     }
 
     this.request = request.request.defaults(requestDefaults);
-    this.graphql = graphql.withCustomRequest(this.request).defaults(_objectSpread2(_objectSpread2({}, requestDefaults), {}, {
-      baseUrl: requestDefaults.baseUrl.replace(/\/api\/v3$/, "/api")
-    }));
+    this.graphql = graphql.withCustomRequest(this.request).defaults(requestDefaults);
     this.log = Object.assign({
       debug: () => {},
       info: () => {},
@@ -1336,7 +1382,7 @@ class Octokit {
       error: console.error.bind(console)
     }, options.log);
     this.hook = hook; // (1) If neither `options.authStrategy` nor `options.auth` are set, the `octokit` instance
-    //     is unauthenticated. The `this.auth()` method is a no-op and no request hook is registred.
+    //     is unauthenticated. The `this.auth()` method is a no-op and no request hook is registered.
     // (2) If only `options.auth` is set, use the default token authentication strategy.
     // (3) If `options.authStrategy` is set then use it and pass in `options.auth`. Always pass own request as many strategies accept a custom request instance.
     // TODO: type `options.auth` based on `options.authStrategy`.
@@ -1355,8 +1401,21 @@ class Octokit {
         this.auth = auth;
       }
     } else {
-      const auth = options.authStrategy(Object.assign({
-        request: this.request
+      const {
+        authStrategy
+      } = options,
+            otherOptions = _objectWithoutProperties(options, ["authStrategy"]);
+
+      const auth = authStrategy(Object.assign({
+        request: this.request,
+        log: this.log,
+        // we pass the current octokit instance as well as its constructor options
+        // to allow for authentication strategies that return a new octokit instance
+        // that shares the same internal state as the current one. The original
+        // requirement for this was the "event-octokit" authentication strategy
+        // of https://github.com/probot/octokit-auth-probot.
+        octokit: this,
+        octokitOptions: otherOptions
       }, options.auth)); // @ts-ignore  ¯\_(ツ)_/¯
 
       hook.wrap("request", auth.hook);
@@ -1415,7 +1474,7 @@ exports.Octokit = Octokit;
 
 /***/ }),
 
-/***/ 355:
+/***/ 1148:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
@@ -1423,8 +1482,8 @@ exports.Octokit = Octokit;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-var isPlainObject = __webpack_require__(792);
-var universalUserAgent = __webpack_require__(2066);
+var isPlainObject = __webpack_require__(3646);
+var universalUserAgent = __webpack_require__(6924);
 
 function lowercaseKeys(object) {
   if (!object) {
@@ -1453,6 +1512,16 @@ function mergeDeep(defaults, options) {
   return result;
 }
 
+function removeUndefinedProperties(obj) {
+  for (const key in obj) {
+    if (obj[key] === undefined) {
+      delete obj[key];
+    }
+  }
+
+  return obj;
+}
+
 function merge(defaults, route, options) {
   if (typeof route === "string") {
     let [method, url] = route.split(" ");
@@ -1467,7 +1536,10 @@ function merge(defaults, route, options) {
   } // lowercase header names before merging with defaults to avoid duplicates
 
 
-  options.headers = lowercaseKeys(options.headers);
+  options.headers = lowercaseKeys(options.headers); // remove properties with undefined values before merging
+
+  removeUndefinedProperties(options);
+  removeUndefinedProperties(options.headers);
   const mergedOptions = mergeDeep(defaults || {}, options); // mediaType.previews arrays are merged, instead of overwritten
 
   if (defaults && defaults.mediaType.previews.length) {
@@ -1689,7 +1761,7 @@ function parse(options) {
   // https://fetch.spec.whatwg.org/#methods
   let method = options.method.toUpperCase(); // replace :varname with {varname} to make it RFC 6570 compatible
 
-  let url = (options.url || "/").replace(/:([a-z]\w+)/g, "{+$1}");
+  let url = (options.url || "/").replace(/:([a-z]\w+)/g, "{$1}");
   let headers = Object.assign({}, options.headers);
   let body;
   let parameters = omit(options, ["method", "baseUrl", "url", "headers", "request", "mediaType"]); // extract variable names from URL to calculate remaining variables later
@@ -1774,7 +1846,7 @@ function withDefaults(oldDefaults, newDefaults) {
   });
 }
 
-const VERSION = "6.0.6";
+const VERSION = "6.0.9";
 
 const userAgent = `octokit-endpoint.js/${VERSION} ${universalUserAgent.getUserAgent()}`; // DEFAULTS has all properties set that EndpointOptions has, except url.
 // So we use RequestParameters and add method as additional required property.
@@ -1800,7 +1872,7 @@ exports.endpoint = endpoint;
 
 /***/ }),
 
-/***/ 9202:
+/***/ 3391:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
@@ -1808,10 +1880,10 @@ exports.endpoint = endpoint;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-var request = __webpack_require__(8277);
-var universalUserAgent = __webpack_require__(2066);
+var request = __webpack_require__(7154);
+var universalUserAgent = __webpack_require__(6924);
 
-const VERSION = "4.5.6";
+const VERSION = "4.5.7";
 
 class GraphqlError extends Error {
   constructor(request, response) {
@@ -1916,7 +1988,7 @@ exports.withCustomRequest = withCustomRequest;
 
 /***/ }),
 
-/***/ 5609:
+/***/ 5700:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -1924,7 +1996,7 @@ exports.withCustomRequest = withCustomRequest;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-const VERSION = "2.3.3";
+const VERSION = "2.6.0";
 
 /**
  * Some “list” response that can be paginated have a different response structure
@@ -1977,26 +2049,23 @@ function iterator(octokit, route, parameters) {
   let url = options.url;
   return {
     [Symbol.asyncIterator]: () => ({
-      next() {
-        if (!url) {
-          return Promise.resolve({
-            done: true
-          });
-        }
-
-        return requestMethod({
+      async next() {
+        if (!url) return {
+          done: true
+        };
+        const response = await requestMethod({
           method,
           url,
           headers
-        }).then(normalizePaginatedListResponse).then(response => {
-          // `response.headers.link` format:
-          // '<https://api.github.com/users/aseemk/followers?page=2>; rel="next", <https://api.github.com/users/aseemk/followers?page=2>; rel="last"'
-          // sets `url` to undefined if "next" URL is not present or `link` header is not set
-          url = ((response.headers.link || "").match(/<([^>]+)>;\s*rel="next"/) || [])[1];
-          return {
-            value: response
-          };
         });
+        const normalizedResponse = normalizePaginatedListResponse(response); // `response.headers.link` format:
+        // '<https://api.github.com/users/aseemk/followers?page=2>; rel="next", <https://api.github.com/users/aseemk/followers?page=2>; rel="last"'
+        // sets `url` to undefined if "next" URL is not present or `link` header is not set
+
+        url = ((normalizedResponse.headers.link || "").match(/<([^>]+)>;\s*rel="next"/) || [])[1];
+        return {
+          value: normalizedResponse
+        };
       }
 
     })
@@ -2034,6 +2103,10 @@ function gather(octokit, results, iterator, mapFn) {
   });
 }
 
+const composePaginateRest = Object.assign(paginate, {
+  iterator
+});
+
 /**
  * @param octokit Octokit instance
  * @param options Options passed to Octokit constructor
@@ -2048,13 +2121,14 @@ function paginateRest(octokit) {
 }
 paginateRest.VERSION = VERSION;
 
+exports.composePaginateRest = composePaginateRest;
 exports.paginateRest = paginateRest;
 //# sourceMappingURL=index.js.map
 
 
 /***/ }),
 
-/***/ 4355:
+/***/ 35:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -2248,8 +2322,15 @@ const Endpoints = {
     }]
   },
   codeScanning: {
-    getAlert: ["GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_id}"],
-    listAlertsForRepo: ["GET /repos/{owner}/{repo}/code-scanning/alerts"]
+    getAlert: ["GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}", {}, {
+      renamedParameters: {
+        alert_id: "alert_number"
+      }
+    }],
+    listAlertsForRepo: ["GET /repos/{owner}/{repo}/code-scanning/alerts"],
+    listRecentAnalyses: ["GET /repos/{owner}/{repo}/code-scanning/analyses"],
+    updateAlert: ["PATCH /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}"],
+    uploadSarif: ["POST /repos/{owner}/{repo}/code-scanning/sarifs"]
   },
   codesOfConduct: {
     getAllCodesOfConduct: ["GET /codes_of_conduct", {
@@ -3104,7 +3185,7 @@ const Endpoints = {
   }
 };
 
-const VERSION = "4.1.4";
+const VERSION = "4.2.1";
 
 function endpointsToMethods(octokit, endpointsMap) {
   const newMethods = {};
@@ -3209,7 +3290,7 @@ exports.restEndpointMethods = restEndpointMethods;
 
 /***/ }),
 
-/***/ 520:
+/***/ 6184:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
@@ -3219,8 +3300,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var deprecation = __webpack_require__(6906);
-var once = _interopDefault(__webpack_require__(943));
+var deprecation = __webpack_require__(3806);
+var once = _interopDefault(__webpack_require__(8962));
 
 const logOnce = once(deprecation => console.warn(deprecation));
 /**
@@ -3272,7 +3353,7 @@ exports.RequestError = RequestError;
 
 /***/ }),
 
-/***/ 8277:
+/***/ 7154:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
@@ -3282,13 +3363,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var endpoint = __webpack_require__(355);
-var universalUserAgent = __webpack_require__(2066);
-var isPlainObject = __webpack_require__(792);
-var nodeFetch = _interopDefault(__webpack_require__(241));
-var requestError = __webpack_require__(520);
+var endpoint = __webpack_require__(1148);
+var universalUserAgent = __webpack_require__(6924);
+var isPlainObject = __webpack_require__(3646);
+var nodeFetch = _interopDefault(__webpack_require__(4449));
+var requestError = __webpack_require__(6184);
 
-const VERSION = "5.4.8";
+const VERSION = "5.4.10";
 
 function getBufferResponse(response) {
   return response.arrayBuffer();
@@ -3428,12 +3509,12 @@ exports.request = request;
 
 /***/ }),
 
-/***/ 1410:
+/***/ 5146:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var register = __webpack_require__(5123)
-var addHook = __webpack_require__(6194)
-var removeHook = __webpack_require__(1035)
+var register = __webpack_require__(4462)
+var addHook = __webpack_require__(6189)
+var removeHook = __webpack_require__(6617)
 
 // bind with array of arguments: https://stackoverflow.com/a/21792913
 var bind = Function.bind
@@ -3492,7 +3573,7 @@ module.exports.Collection = Hook.Collection
 
 /***/ }),
 
-/***/ 6194:
+/***/ 6189:
 /***/ ((module) => {
 
 module.exports = addHook
@@ -3545,7 +3626,7 @@ function addHook (state, kind, name, hook) {
 
 /***/ }),
 
-/***/ 5123:
+/***/ 4462:
 /***/ ((module) => {
 
 module.exports = register
@@ -3580,7 +3661,7 @@ function register (state, name, method, options) {
 
 /***/ }),
 
-/***/ 1035:
+/***/ 6617:
 /***/ ((module) => {
 
 module.exports = removeHook
@@ -3604,7 +3685,7 @@ function removeHook (state, name, method) {
 
 /***/ }),
 
-/***/ 6906:
+/***/ 3806:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -3632,7 +3713,7 @@ exports.Deprecation = Deprecation;
 
 /***/ }),
 
-/***/ 792:
+/***/ 3646:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -3678,7 +3759,7 @@ exports.isPlainObject = isPlainObject;
 
 /***/ }),
 
-/***/ 241:
+/***/ 4449:
 /***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
@@ -3843,7 +3924,7 @@ FetchError.prototype.name = 'FetchError';
 
 let convert;
 try {
-	convert = __webpack_require__(3122).convert;
+	convert = __webpack_require__(1568).convert;
 } catch (e) {}
 
 const INTERNALS = Symbol('Body internals');
@@ -5335,10 +5416,10 @@ exports.FetchError = FetchError;
 
 /***/ }),
 
-/***/ 943:
+/***/ 8962:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var wrappy = __webpack_require__(4786)
+var wrappy = __webpack_require__(9153)
 module.exports = wrappy(once)
 module.exports.strict = wrappy(onceStrict)
 
@@ -5384,7 +5465,7 @@ function onceStrict (fn) {
 
 /***/ }),
 
-/***/ 948:
+/***/ 1506:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const ANY = Symbol('SemVer ANY')
@@ -5521,16 +5602,16 @@ class Comparator {
 
 module.exports = Comparator
 
-const {re, t} = __webpack_require__(8931)
-const cmp = __webpack_require__(5250)
-const debug = __webpack_require__(4286)
-const SemVer = __webpack_require__(713)
-const Range = __webpack_require__(5545)
+const {re, t} = __webpack_require__(961)
+const cmp = __webpack_require__(7712)
+const debug = __webpack_require__(2986)
+const SemVer = __webpack_require__(5934)
+const Range = __webpack_require__(1137)
 
 
 /***/ }),
 
-/***/ 5545:
+/***/ 1137:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // hoisted class for cyclic dependency
@@ -5679,16 +5760,16 @@ class Range {
 }
 module.exports = Range
 
-const Comparator = __webpack_require__(948)
-const debug = __webpack_require__(4286)
-const SemVer = __webpack_require__(713)
+const Comparator = __webpack_require__(1506)
+const debug = __webpack_require__(2986)
+const SemVer = __webpack_require__(5934)
 const {
   re,
   t,
   comparatorTrimReplace,
   tildeTrimReplace,
   caretTrimReplace
-} = __webpack_require__(8931)
+} = __webpack_require__(961)
 
 // take a set of comparators and determine whether there
 // exists a version which can satisfy it
@@ -6000,14 +6081,14 @@ const testSet = (set, version, options) => {
 
 /***/ }),
 
-/***/ 713:
+/***/ 5934:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const debug = __webpack_require__(4286)
-const { MAX_LENGTH, MAX_SAFE_INTEGER } = __webpack_require__(9757)
-const { re, t } = __webpack_require__(8931)
+const debug = __webpack_require__(2986)
+const { MAX_LENGTH, MAX_SAFE_INTEGER } = __webpack_require__(5875)
+const { re, t } = __webpack_require__(961)
 
-const { compareIdentifiers } = __webpack_require__(1932)
+const { compareIdentifiers } = __webpack_require__(1996)
 class SemVer {
   constructor (version, options) {
     if (!options || typeof options !== 'object') {
@@ -6297,10 +6378,10 @@ module.exports = SemVer
 
 /***/ }),
 
-/***/ 6644:
+/***/ 1626:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const parse = __webpack_require__(4697)
+const parse = __webpack_require__(3606)
 const clean = (version, options) => {
   const s = parse(version.trim().replace(/^[=v]+/, ''), options)
   return s ? s.version : null
@@ -6310,15 +6391,15 @@ module.exports = clean
 
 /***/ }),
 
-/***/ 5250:
+/***/ 7712:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const eq = __webpack_require__(87)
-const neq = __webpack_require__(2611)
-const gt = __webpack_require__(8698)
-const gte = __webpack_require__(4810)
-const lt = __webpack_require__(3989)
-const lte = __webpack_require__(2603)
+const eq = __webpack_require__(4540)
+const neq = __webpack_require__(7639)
+const gt = __webpack_require__(5646)
+const gte = __webpack_require__(7449)
+const lt = __webpack_require__(230)
+const lte = __webpack_require__(4167)
 
 const cmp = (a, op, b, loose) => {
   switch (op) {
@@ -6365,12 +6446,12 @@ module.exports = cmp
 
 /***/ }),
 
-/***/ 9266:
+/***/ 3502:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const SemVer = __webpack_require__(713)
-const parse = __webpack_require__(4697)
-const {re, t} = __webpack_require__(8931)
+const SemVer = __webpack_require__(5934)
+const parse = __webpack_require__(3606)
+const {re, t} = __webpack_require__(961)
 
 const coerce = (version, options) => {
   if (version instanceof SemVer) {
@@ -6423,10 +6504,10 @@ module.exports = coerce
 
 /***/ }),
 
-/***/ 4155:
+/***/ 6461:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const SemVer = __webpack_require__(713)
+const SemVer = __webpack_require__(5934)
 const compareBuild = (a, b, loose) => {
   const versionA = new SemVer(a, loose)
   const versionB = new SemVer(b, loose)
@@ -6437,20 +6518,20 @@ module.exports = compareBuild
 
 /***/ }),
 
-/***/ 1141:
+/***/ 1475:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const compare = __webpack_require__(7658)
+const compare = __webpack_require__(6312)
 const compareLoose = (a, b) => compare(a, b, true)
 module.exports = compareLoose
 
 
 /***/ }),
 
-/***/ 7658:
+/***/ 6312:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const SemVer = __webpack_require__(713)
+const SemVer = __webpack_require__(5934)
 const compare = (a, b, loose) =>
   new SemVer(a, loose).compare(new SemVer(b, loose))
 
@@ -6459,11 +6540,11 @@ module.exports = compare
 
 /***/ }),
 
-/***/ 9189:
+/***/ 3436:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const parse = __webpack_require__(4697)
-const eq = __webpack_require__(87)
+const parse = __webpack_require__(3606)
+const eq = __webpack_require__(4540)
 
 const diff = (version1, version2) => {
   if (eq(version1, version2)) {
@@ -6489,40 +6570,40 @@ module.exports = diff
 
 /***/ }),
 
-/***/ 87:
+/***/ 4540:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const compare = __webpack_require__(7658)
+const compare = __webpack_require__(6312)
 const eq = (a, b, loose) => compare(a, b, loose) === 0
 module.exports = eq
 
 
 /***/ }),
 
-/***/ 8698:
+/***/ 5646:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const compare = __webpack_require__(7658)
+const compare = __webpack_require__(6312)
 const gt = (a, b, loose) => compare(a, b, loose) > 0
 module.exports = gt
 
 
 /***/ }),
 
-/***/ 4810:
+/***/ 7449:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const compare = __webpack_require__(7658)
+const compare = __webpack_require__(6312)
 const gte = (a, b, loose) => compare(a, b, loose) >= 0
 module.exports = gte
 
 
 /***/ }),
 
-/***/ 8568:
+/***/ 6962:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const SemVer = __webpack_require__(713)
+const SemVer = __webpack_require__(5934)
 
 const inc = (version, release, options, identifier) => {
   if (typeof (options) === 'string') {
@@ -6541,62 +6622,62 @@ module.exports = inc
 
 /***/ }),
 
-/***/ 3989:
+/***/ 230:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const compare = __webpack_require__(7658)
+const compare = __webpack_require__(6312)
 const lt = (a, b, loose) => compare(a, b, loose) < 0
 module.exports = lt
 
 
 /***/ }),
 
-/***/ 2603:
+/***/ 4167:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const compare = __webpack_require__(7658)
+const compare = __webpack_require__(6312)
 const lte = (a, b, loose) => compare(a, b, loose) <= 0
 module.exports = lte
 
 
 /***/ }),
 
-/***/ 9489:
+/***/ 8547:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const SemVer = __webpack_require__(713)
+const SemVer = __webpack_require__(5934)
 const major = (a, loose) => new SemVer(a, loose).major
 module.exports = major
 
 
 /***/ }),
 
-/***/ 1878:
+/***/ 3762:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const SemVer = __webpack_require__(713)
+const SemVer = __webpack_require__(5934)
 const minor = (a, loose) => new SemVer(a, loose).minor
 module.exports = minor
 
 
 /***/ }),
 
-/***/ 2611:
+/***/ 7639:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const compare = __webpack_require__(7658)
+const compare = __webpack_require__(6312)
 const neq = (a, b, loose) => compare(a, b, loose) !== 0
 module.exports = neq
 
 
 /***/ }),
 
-/***/ 4697:
+/***/ 3606:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const {MAX_LENGTH} = __webpack_require__(9757)
-const { re, t } = __webpack_require__(8931)
-const SemVer = __webpack_require__(713)
+const {MAX_LENGTH} = __webpack_require__(5875)
+const { re, t } = __webpack_require__(961)
+const SemVer = __webpack_require__(5934)
 
 const parse = (version, options) => {
   if (!options || typeof options !== 'object') {
@@ -6635,20 +6716,20 @@ module.exports = parse
 
 /***/ }),
 
-/***/ 9431:
+/***/ 3270:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const SemVer = __webpack_require__(713)
+const SemVer = __webpack_require__(5934)
 const patch = (a, loose) => new SemVer(a, loose).patch
 module.exports = patch
 
 
 /***/ }),
 
-/***/ 7425:
+/***/ 4222:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const parse = __webpack_require__(4697)
+const parse = __webpack_require__(3606)
 const prerelease = (version, options) => {
   const parsed = parse(version, options)
   return (parsed && parsed.prerelease.length) ? parsed.prerelease : null
@@ -6658,30 +6739,30 @@ module.exports = prerelease
 
 /***/ }),
 
-/***/ 3556:
+/***/ 5978:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const compare = __webpack_require__(7658)
+const compare = __webpack_require__(6312)
 const rcompare = (a, b, loose) => compare(b, a, loose)
 module.exports = rcompare
 
 
 /***/ }),
 
-/***/ 4557:
+/***/ 2943:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const compareBuild = __webpack_require__(4155)
+const compareBuild = __webpack_require__(6461)
 const rsort = (list, loose) => list.sort((a, b) => compareBuild(b, a, loose))
 module.exports = rsort
 
 
 /***/ }),
 
-/***/ 1369:
+/***/ 695:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const Range = __webpack_require__(5545)
+const Range = __webpack_require__(1137)
 const satisfies = (version, range, options) => {
   try {
     range = new Range(range, options)
@@ -6695,20 +6776,20 @@ module.exports = satisfies
 
 /***/ }),
 
-/***/ 9066:
+/***/ 8748:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const compareBuild = __webpack_require__(4155)
+const compareBuild = __webpack_require__(6461)
 const sort = (list, loose) => list.sort((a, b) => compareBuild(a, b, loose))
 module.exports = sort
 
 
 /***/ }),
 
-/***/ 6182:
+/***/ 4048:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const parse = __webpack_require__(4697)
+const parse = __webpack_require__(3606)
 const valid = (version, options) => {
   const v = parse(version, options)
   return v ? v.version : null
@@ -6718,62 +6799,62 @@ module.exports = valid
 
 /***/ }),
 
-/***/ 2121:
+/***/ 5411:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // just pre-load all the stuff that index.js lazily exports
-const internalRe = __webpack_require__(8931)
+const internalRe = __webpack_require__(961)
 module.exports = {
   re: internalRe.re,
   src: internalRe.src,
   tokens: internalRe.t,
-  SEMVER_SPEC_VERSION: __webpack_require__(9757).SEMVER_SPEC_VERSION,
-  SemVer: __webpack_require__(713),
-  compareIdentifiers: __webpack_require__(1932).compareIdentifiers,
-  rcompareIdentifiers: __webpack_require__(1932).rcompareIdentifiers,
-  parse: __webpack_require__(4697),
-  valid: __webpack_require__(6182),
-  clean: __webpack_require__(6644),
-  inc: __webpack_require__(8568),
-  diff: __webpack_require__(9189),
-  major: __webpack_require__(9489),
-  minor: __webpack_require__(1878),
-  patch: __webpack_require__(9431),
-  prerelease: __webpack_require__(7425),
-  compare: __webpack_require__(7658),
-  rcompare: __webpack_require__(3556),
-  compareLoose: __webpack_require__(1141),
-  compareBuild: __webpack_require__(4155),
-  sort: __webpack_require__(9066),
-  rsort: __webpack_require__(4557),
-  gt: __webpack_require__(8698),
-  lt: __webpack_require__(3989),
-  eq: __webpack_require__(87),
-  neq: __webpack_require__(2611),
-  gte: __webpack_require__(4810),
-  lte: __webpack_require__(2603),
-  cmp: __webpack_require__(5250),
-  coerce: __webpack_require__(9266),
-  Comparator: __webpack_require__(948),
-  Range: __webpack_require__(5545),
-  satisfies: __webpack_require__(1369),
-  toComparators: __webpack_require__(487),
-  maxSatisfying: __webpack_require__(523),
-  minSatisfying: __webpack_require__(8885),
-  minVersion: __webpack_require__(1730),
-  validRange: __webpack_require__(9990),
-  outside: __webpack_require__(1517),
-  gtr: __webpack_require__(8129),
-  ltr: __webpack_require__(457),
-  intersects: __webpack_require__(7903),
-  simplifyRange: __webpack_require__(4747),
-  subset: __webpack_require__(4463),
+  SEMVER_SPEC_VERSION: __webpack_require__(5875).SEMVER_SPEC_VERSION,
+  SemVer: __webpack_require__(5934),
+  compareIdentifiers: __webpack_require__(1996).compareIdentifiers,
+  rcompareIdentifiers: __webpack_require__(1996).rcompareIdentifiers,
+  parse: __webpack_require__(3606),
+  valid: __webpack_require__(4048),
+  clean: __webpack_require__(1626),
+  inc: __webpack_require__(6962),
+  diff: __webpack_require__(3436),
+  major: __webpack_require__(8547),
+  minor: __webpack_require__(3762),
+  patch: __webpack_require__(3270),
+  prerelease: __webpack_require__(4222),
+  compare: __webpack_require__(6312),
+  rcompare: __webpack_require__(5978),
+  compareLoose: __webpack_require__(1475),
+  compareBuild: __webpack_require__(6461),
+  sort: __webpack_require__(8748),
+  rsort: __webpack_require__(2943),
+  gt: __webpack_require__(5646),
+  lt: __webpack_require__(230),
+  eq: __webpack_require__(4540),
+  neq: __webpack_require__(7639),
+  gte: __webpack_require__(7449),
+  lte: __webpack_require__(4167),
+  cmp: __webpack_require__(7712),
+  coerce: __webpack_require__(3502),
+  Comparator: __webpack_require__(1506),
+  Range: __webpack_require__(1137),
+  satisfies: __webpack_require__(695),
+  toComparators: __webpack_require__(6234),
+  maxSatisfying: __webpack_require__(3568),
+  minSatisfying: __webpack_require__(4658),
+  minVersion: __webpack_require__(5529),
+  validRange: __webpack_require__(8868),
+  outside: __webpack_require__(9198),
+  gtr: __webpack_require__(4261),
+  ltr: __webpack_require__(1179),
+  intersects: __webpack_require__(2979),
+  simplifyRange: __webpack_require__(7739),
+  subset: __webpack_require__(7225),
 }
 
 
 /***/ }),
 
-/***/ 9757:
+/***/ 5875:
 /***/ ((module) => {
 
 // Note: this is the semver.org version of the spec that it implements
@@ -6797,7 +6878,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 4286:
+/***/ 2986:
 /***/ ((module) => {
 
 const debug = (
@@ -6813,7 +6894,7 @@ module.exports = debug
 
 /***/ }),
 
-/***/ 1932:
+/***/ 1996:
 /***/ ((module) => {
 
 const numeric = /^[0-9]+$/
@@ -6843,11 +6924,11 @@ module.exports = {
 
 /***/ }),
 
-/***/ 8931:
+/***/ 961:
 /***/ ((module, exports, __webpack_require__) => {
 
-const { MAX_SAFE_COMPONENT_LENGTH } = __webpack_require__(9757)
-const debug = __webpack_require__(4286)
+const { MAX_SAFE_COMPONENT_LENGTH } = __webpack_require__(5875)
+const debug = __webpack_require__(2986)
 exports = module.exports = {}
 
 // The actual regexps go on exports.re
@@ -7032,21 +7113,21 @@ createToken('GTE0PRE', '^\\s*>=\\s*0\.0\.0-0\\s*$')
 
 /***/ }),
 
-/***/ 8129:
+/***/ 4261:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // Determine if version is greater than all the versions possible in the range.
-const outside = __webpack_require__(1517)
+const outside = __webpack_require__(9198)
 const gtr = (version, range, options) => outside(version, range, '>', options)
 module.exports = gtr
 
 
 /***/ }),
 
-/***/ 7903:
+/***/ 2979:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const Range = __webpack_require__(5545)
+const Range = __webpack_require__(1137)
 const intersects = (r1, r2, options) => {
   r1 = new Range(r1, options)
   r2 = new Range(r2, options)
@@ -7057,10 +7138,10 @@ module.exports = intersects
 
 /***/ }),
 
-/***/ 457:
+/***/ 1179:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const outside = __webpack_require__(1517)
+const outside = __webpack_require__(9198)
 // Determine if version is less than all the versions possible in the range
 const ltr = (version, range, options) => outside(version, range, '<', options)
 module.exports = ltr
@@ -7068,11 +7149,11 @@ module.exports = ltr
 
 /***/ }),
 
-/***/ 523:
+/***/ 3568:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const SemVer = __webpack_require__(713)
-const Range = __webpack_require__(5545)
+const SemVer = __webpack_require__(5934)
+const Range = __webpack_require__(1137)
 
 const maxSatisfying = (versions, range, options) => {
   let max = null
@@ -7100,11 +7181,11 @@ module.exports = maxSatisfying
 
 /***/ }),
 
-/***/ 8885:
+/***/ 4658:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const SemVer = __webpack_require__(713)
-const Range = __webpack_require__(5545)
+const SemVer = __webpack_require__(5934)
+const Range = __webpack_require__(1137)
 const minSatisfying = (versions, range, options) => {
   let min = null
   let minSV = null
@@ -7131,12 +7212,12 @@ module.exports = minSatisfying
 
 /***/ }),
 
-/***/ 1730:
+/***/ 5529:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const SemVer = __webpack_require__(713)
-const Range = __webpack_require__(5545)
-const gt = __webpack_require__(8698)
+const SemVer = __webpack_require__(5934)
+const Range = __webpack_require__(1137)
+const gt = __webpack_require__(5646)
 
 const minVersion = (range, loose) => {
   range = new Range(range, loose)
@@ -7195,18 +7276,18 @@ module.exports = minVersion
 
 /***/ }),
 
-/***/ 1517:
+/***/ 9198:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const SemVer = __webpack_require__(713)
-const Comparator = __webpack_require__(948)
+const SemVer = __webpack_require__(5934)
+const Comparator = __webpack_require__(1506)
 const {ANY} = Comparator
-const Range = __webpack_require__(5545)
-const satisfies = __webpack_require__(1369)
-const gt = __webpack_require__(8698)
-const lt = __webpack_require__(3989)
-const lte = __webpack_require__(2603)
-const gte = __webpack_require__(4810)
+const Range = __webpack_require__(1137)
+const satisfies = __webpack_require__(695)
+const gt = __webpack_require__(5646)
+const lt = __webpack_require__(230)
+const lte = __webpack_require__(4167)
+const gte = __webpack_require__(7449)
 
 const outside = (version, range, hilo, options) => {
   version = new SemVer(version, options)
@@ -7282,14 +7363,14 @@ module.exports = outside
 
 /***/ }),
 
-/***/ 4747:
+/***/ 7739:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // given a set of versions and a range, create a "simplified" range
 // that includes the same versions that the original range does
 // If the original range is shorter than the simplified one, return that.
-const satisfies = __webpack_require__(1369)
-const compare = __webpack_require__(7658)
+const satisfies = __webpack_require__(695)
+const compare = __webpack_require__(6312)
 module.exports = (versions, range, options) => {
   const set = []
   let min = null
@@ -7333,13 +7414,13 @@ module.exports = (versions, range, options) => {
 
 /***/ }),
 
-/***/ 4463:
+/***/ 7225:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const Range = __webpack_require__(5545)
-const { ANY } = __webpack_require__(948)
-const satisfies = __webpack_require__(1369)
-const compare = __webpack_require__(7658)
+const Range = __webpack_require__(1137)
+const { ANY } = __webpack_require__(1506)
+const satisfies = __webpack_require__(695)
+const compare = __webpack_require__(6312)
 
 // Complex range `r1 || r2 || ...` is a subset of `R1 || R2 || ...` iff:
 // - Every simple range `r1, r2, ...` is a subset of some `R1, R2, ...`
@@ -7495,10 +7576,10 @@ module.exports = subset
 
 /***/ }),
 
-/***/ 487:
+/***/ 6234:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const Range = __webpack_require__(5545)
+const Range = __webpack_require__(1137)
 
 // Mostly just for testing and legacy API reasons
 const toComparators = (range, options) =>
@@ -7510,10 +7591,10 @@ module.exports = toComparators
 
 /***/ }),
 
-/***/ 9990:
+/***/ 8868:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const Range = __webpack_require__(5545)
+const Range = __webpack_require__(1137)
 const validRange = (range, options) => {
   try {
     // Return '*' instead of '' so that truthiness works.
@@ -7528,15 +7609,15 @@ module.exports = validRange
 
 /***/ }),
 
-/***/ 748:
+/***/ 5220:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-module.exports = __webpack_require__(128);
+module.exports = __webpack_require__(6354);
 
 
 /***/ }),
 
-/***/ 128:
+/***/ 6354:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
@@ -7808,7 +7889,7 @@ exports.debug = debug; // for test
 
 /***/ }),
 
-/***/ 2066:
+/***/ 6924:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -7834,7 +7915,7 @@ exports.getUserAgent = getUserAgent;
 
 /***/ }),
 
-/***/ 4786:
+/***/ 9153:
 /***/ ((module) => {
 
 // Returns a wrapper function that returns a wrapped callback
@@ -7874,32 +7955,27 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 941:
+/***/ 3385:
 /***/ ((__unused_webpack_module, exports) => {
 
 
 exports.invalidTag = {message: 'tag_name value is not valid or cannot be coerced'}
-exports.tooManyPatterns = {message: 'only one pattern allowed per strategy'}
 
 
 /***/ }),
 
-/***/ 6964:
+/***/ 1031:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
-const s = __webpack_require__(2121)
-const core = __webpack_require__(5330)
-const {getIdentifier} = __webpack_require__(1440)
-const {invalidTag, tooManyPatterns} = __webpack_require__(941)
+const s = __webpack_require__(5411)
+const core = __webpack_require__(3821)
+const {getIdentifier} = __webpack_require__(6007)
+const {invalidTag} = __webpack_require__(3385)
 
 const matcher = /(%(?<strategy>(?<major>x?)\.?(?<minor>y?)\.?(?<patch>z?))%)(?<variant>.*)/ig
 const latest = /^latest*/
 
 exports.parseTag = (pattern, tag) => {
-  // if pattern starts with 'latest' return entire pattern
-  if (latest.test(pattern)) return {tag: pattern}
-  if (pattern.indexOf('%') > 2) return {error: tooManyPatterns}
-
   let Tag = {}
   let matches = pattern.matchAll(matcher)
 
@@ -7932,11 +8008,53 @@ exports.parseTag = (pattern, tag) => {
   return Tag
 }
 
+exports.parseInputList = (name) => {
+  try {
+    if (name.length < 1) {
+      throw 'tag list required'
+    }
+    return name
+      .split(/\r?\n/)
+      .filter(x => x)
+      .reduce((acc, line) => acc.concat(line.split(',').filter(x => x)).map(pat => pat.trim()), [])
+
+  } catch (e) {
+    return e
+  }
+}
 
 /***/ }),
 
-/***/ 1440:
-/***/ ((__unused_webpack_module, exports) => {
+/***/ 5454:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+const {parseTag, parseInputList} = __webpack_require__(1031)
+
+exports.taggingStrategy = ({inputTags, latest, tagName}) => {
+  try {
+    let rawInputTags = parseInputList(inputTags)
+    let outputTags = rawInputTags
+      .map(tag => parseTag(tag, tagName))
+      .reduce((tags,tag) => {
+        return [...tags, tag.tag]
+        },
+      [])
+    
+    if(latest) outputTags.push('latest')
+    return outputTags.join(',')
+
+  } catch (error) {
+    return `tagging-strategy was unable to parse your tags...\n${error}`
+  }
+
+}
+
+/***/ }),
+
+/***/ 6007:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+const core = __webpack_require__(3821)
 
 exports.getIdentifier = (identifier, raw) => {
   var single = new RegExp('\\W+(' + `${identifier}` + ')$')
@@ -7957,7 +8075,7 @@ exports.getIdentifier = (identifier, raw) => {
 
 /***/ }),
 
-/***/ 3122:
+/***/ 1568:
 /***/ ((module) => {
 
 module.exports = eval("require")("encoding");
@@ -7969,7 +8087,7 @@ module.exports = eval("require")("encoding");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("assert");
+module.exports = require("assert");;
 
 /***/ }),
 
@@ -7977,7 +8095,7 @@ module.exports = require("assert");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("events");
+module.exports = require("events");;
 
 /***/ }),
 
@@ -7985,7 +8103,7 @@ module.exports = require("events");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("fs");
+module.exports = require("fs");;
 
 /***/ }),
 
@@ -7993,7 +8111,7 @@ module.exports = require("fs");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("http");
+module.exports = require("http");;
 
 /***/ }),
 
@@ -8001,7 +8119,7 @@ module.exports = require("http");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("https");
+module.exports = require("https");;
 
 /***/ }),
 
@@ -8009,7 +8127,7 @@ module.exports = require("https");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("net");
+module.exports = require("net");;
 
 /***/ }),
 
@@ -8017,7 +8135,7 @@ module.exports = require("net");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("os");
+module.exports = require("os");;
 
 /***/ }),
 
@@ -8025,7 +8143,7 @@ module.exports = require("os");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("path");
+module.exports = require("path");;
 
 /***/ }),
 
@@ -8033,7 +8151,7 @@ module.exports = require("path");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("stream");
+module.exports = require("stream");;
 
 /***/ }),
 
@@ -8041,7 +8159,7 @@ module.exports = require("stream");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("tls");
+module.exports = require("tls");;
 
 /***/ }),
 
@@ -8049,7 +8167,7 @@ module.exports = require("tls");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("url");
+module.exports = require("url");;
 
 /***/ }),
 
@@ -8057,7 +8175,7 @@ module.exports = require("url");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("util");
+module.exports = require("util");;
 
 /***/ }),
 
@@ -8065,7 +8183,7 @@ module.exports = require("util");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("zlib");
+module.exports = require("zlib");;
 
 /***/ })
 
@@ -8107,6 +8225,6 @@ module.exports = require("zlib");
 /******/ 	// module exports must be returned from runtime so entry inlining is disabled
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(4696);
+/******/ 	return __webpack_require__(8433);
 /******/ })()
 ;
