@@ -1,15 +1,9 @@
-const {parseTag} = require('./src/parser')
+const {taggingStrategy} = require('./src/taggingStrategy')
 
-const strategies = [
-  '%X.Y.Z%-foobar',
-  '%X%-foobar',
-  '%X.Y.Z%-foobar',
-  '%X.y.Z%-foobar',
-]
+const strategy = {
+  latest: true,
+  tagName: '1.7.3',
+  inputTags: '%X%,%X.Y%,%X.Y.Z%'
+}
 
-strategies.forEach(pattern => {
-  const tag = parseTag(pattern, '1.0.0-rc2')
-  if (tag.error) console.error(tag.error.message)
-  console.log('\ntag:', tag)
-})
-
+console.log(taggingStrategy(strategy))

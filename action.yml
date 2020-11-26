@@ -4,7 +4,11 @@ branding:
   icon: 'check-square'
   color: 'orange'
 inputs:
-  pattern:
+  latest:
+    description: 'whether or not to produce a latest tag'
+    required: true
+    default: false
+  tags:
     description: 'The tagging strategy for this run'
     required: true
     default: 'X.Y.Z'
@@ -12,8 +16,8 @@ inputs:
     description: 'The string to parse'
     required: true
 outputs:
-  tag:
-    description: 'Outputs a tag based on the the strategy for this run'
+  tags:
+    description: 'Outputs a comma-separated list of tags'
 runs:
   using: 'node12'
   main: 'dist/index.js'
