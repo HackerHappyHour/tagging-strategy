@@ -18,7 +18,7 @@ semver-compatible templating definitions, and other common docker tagging strate
 
 | Name             | Type    | Required   | Description                        |
 |------------------|---------|------------|------------------------------------|
-| `pattern`        | [Strategy](#strategies) | yes | The strategy to parse the tag paylod with |
+| `tags`        | [csv/list of strategies](#strategies) | yes | The strategies to parse the tag paylod with |
 | `tag_name` | String | yes | A `tag_name` from a github [release][] event |
 
 
@@ -26,7 +26,7 @@ semver-compatible templating definitions, and other common docker tagging strate
 
 | Name             | Type    | Description |
 |------------------|---------|-------------|
-| `tag` | `String` | The transformed tag |
+| `tags` | csv string | The transformed tags |
 
 ### Strategies
 
@@ -90,9 +90,6 @@ Examples of using a variant:
 jobs:
   myReleaseExample:
     runs-on: ubuntu-latest
-    stategy:
-      matrix:
-        image-tagging-strategy: ['%X%-foobar', '%X.Y%-foobar', '%X.Y.Z%-foobar']
 
     steps:
     # checkout steps etc...
@@ -102,7 +99,11 @@ jobs:
       uses: HackerHappyHour/tagging-strategy@v1
       if: ${{ github.event_name == 'release' }}
       with:
-        pattern: ${{ matrix.image-tagging-strategy }}
+        latest: true
+        tags: |
+          %X%-foobar
+          %X.Y%-foobar
+          %X.Y.Z%-foobar
         tag_name: ${{ github.ref }}
     - name: Setup Buildx
       id: setup
