@@ -21,18 +21,21 @@ this action once those features are available
 - [Tagging Strategy](#tagging-strategy)
   - [Inputs](#inputs)
   - [Outputs](#outputs)
-    - [Strategies](#strategies)
+  - [Usage](#usage)
+    - [Strategy Parsing](#strategy-parsing)
       - [Pattern](#pattern)
       - [Prerelease](#prerelease)
       - [Variant](#variant)
   - [Examples](#examples)
     - [From Release on repo](#from-release-on-repo)
     - [From Release on External Repository](#from-release-on-external-repository)
+    - [Conditionally produce 'latest'](#conditionally-produce-latest)
 
 ## Inputs
 
 | Name             | Type    | Required   | Description                        |
 |------------------|---------|------------|------------------------------------|
+| `image_name`        | `String` | no | an image to pass to tags for docker | 
 | `latest`        | `Boolean` | yes (default `false`)| The strategies to parse the tag paylod with |
 | `tags`        | [csv/list of strategies](#strategy-parsing) | yes | The strategies to parse the tag paylod with |
 | `tag_name` | `String` | yes (default is `X.Y.Z`) | A semver parseable string |
@@ -61,6 +64,7 @@ steps:
       latest: true
       tags: '%X%, %X%-debian, %X.Y%, %X.Y%-debian'
       tag_name: '1.0.0'
+      image_name: hello/world
 
   - 
     uses: docker/setup-buildx-action@v1
@@ -206,6 +210,7 @@ jobs:
           %X.Y%-foobar
           %X.Y.Z%-foobar
         tag_name: ${{ github.ref }}
+        image_name: foo/bar
     - name: Setup Buildx
       id: setup
       uses: crazy-max/ghaction-docker-buildx@v3
@@ -270,6 +275,7 @@ jobs:
             %X.Y%-foobar
             %X.Y.Z%-foobar
           tag_name: ${{ github.event.client_payload.tag_name }}
+          image_name: foo/bar
       - name: Use Tag
         run: echo ${{ steps.tagging.outputs.tags }}
 

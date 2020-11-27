@@ -1,16 +1,17 @@
 const {parseTag, parseInputList} = require('./parser')
 
-exports.taggingStrategy = ({inputTags, latest, tagName}) => {
+exports.taggingStrategy = ({inputTags, latest, tagName, imageName}) => {
   try {
     let rawInputTags = parseInputList(inputTags)
     let outputTags = rawInputTags
-      .map(tag => parseTag(tag, tagName))
+      .map(tag => parseTag(tag, tagName, imageName))
       .reduce((tags,tag) => {
-        return [...tags, tag.tag]
-        },
-      [])
+        return imageName ? [...tags, `${imageName}:${tag.tag}`] : [...tags, tag.tag]
+      }, [])
     
-    if(latest) outputTags.push('latest')
+    if(latest){
+      imageName ? outputTags.push(`${imageName}:latest`) : outputTags.push('latest')
+    }
     return outputTags.join(',')
 
   } catch (error) {

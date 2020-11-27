@@ -15,6 +15,9 @@ inputs:
   tag_name:
     description: 'The string to parse'
     required: true
+  image_name:
+    description: 'an image to pass to tags for docker'
+    required: false
 outputs:
   tags:
     description: 'Outputs a comma-separated list of tags'
