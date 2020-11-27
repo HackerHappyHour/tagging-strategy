@@ -35,7 +35,7 @@ this action once those features are available
 
 | Name             | Type    | Required   | Description                        |
 |------------------|---------|------------|------------------------------------|
-| `image_name`        | `String` | no | an image to pass to tags for docker | 
+| `image_name`        | `String` | no | an image to pass to tags for docker, omit if not using for docker images | 
 | `latest`        | `Boolean` | yes (default `false`)| The strategies to parse the tag paylod with |
 | `tags`        | [csv/list of strategies](#strategy-parsing) | yes | The strategies to parse the tag paylod with |
 | `tag_name` | `String` | yes (default is `X.Y.Z`) | A semver parseable string |
