@@ -201,7 +201,7 @@ jobs:
     # Image Tagger
     - name: Image Tag Strategy
       id: tagging
-      uses: HackerHappyHour/tagging-strategy@v1
+      uses: HackerHappyHour/tagging-strategy@v2
       if: ${{ github.event_name == 'release' }}
       with:
         latest: true
@@ -267,7 +267,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Produce Docker Tags
         id: tagging
-        uses: HackerHappyHour/tagging-strategy@v1
+        uses: HackerHappyHour/tagging-strategy@v2
         with:
           latest: github.event_type
           tags: |
