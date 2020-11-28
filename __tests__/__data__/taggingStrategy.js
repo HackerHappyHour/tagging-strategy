@@ -27,4 +27,8 @@ exports.scenarios = [
     'hello/world:1-foobar,hello/world:1.0-foobar,hello/world:1.0.0-foobar,hello/world:latest',
     {inputTags:'%X%-foobar,%X.Y%-foobar,%X.Y.Z%-foobar', tagName:'1.0.0', latest: true, imageName: 'hello/world'}
   ],
+  [
+    '1-rc1,1.0-rc1,1.0.0-rc1',
+    {inputTags:'%X%,%X.Y%,%X.Y.Z%', tagName:'1.0.0rc1'}
+  ],
 ]
