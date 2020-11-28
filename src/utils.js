@@ -1,3 +1,5 @@
+const core = require('@actions/core')
+
 exports.getIdentifier = (identifier, raw) => {
   var single = new RegExp('\\W+(' + `${identifier}` + ')$')
   var multi = new RegExp('\\W+(' + `${identifier[0]}`+ '.*' + `${identifier[identifier.length - 1]}`+')$')

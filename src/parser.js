@@ -1,16 +1,12 @@
 const s = require('semver')
 const core = require('@actions/core')
 const {getIdentifier} = require('./utils')
-const {invalidTag, tooManyPatterns} = require('./errors')
+const {invalidTag} = require('./errors')
 
 const matcher = /(%(?<strategy>(?<major>x?)\.?(?<minor>y?)\.?(?<patch>z?))%)(?<variant>.*)/ig
 const latest = /^latest*/
 
 exports.parseTag = (pattern, tag) => {
-  // if pattern starts with 'latest' return entire pattern
-  if (latest.test(pattern)) return {tag: pattern}
-  if (pattern.indexOf('%') > 2) return {error: tooManyPatterns}
-
   let Tag = {}
   let matches = pattern.matchAll(matcher)
 
@@ -41,4 +37,19 @@ exports.parseTag = (pattern, tag) => {
     core.debug(JSON.stringify(Tag))  
   }
   return Tag
+}
+
+exports.parseInputList = (name) => {
+  try {
+    if (name.length < 1) {
+      throw 'tag list required'
+    }
+    return name
+      .split(/\r?\n/)
+      .filter(x => x)
+      .reduce((acc, line) => acc.concat(line.split(',').filter(x => x)).map(pat => pat.trim()), [])
+
+  } catch (e) {
+    return e
+  }
 }
