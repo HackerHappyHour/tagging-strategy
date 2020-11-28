@@ -9,7 +9,7 @@ const core = __webpack_require__(5330)
 const github = __webpack_require__(2943)
 const {taggingStrategy} = __webpack_require__(1457)
 
-const inputTags = getInput('tags')
+const inputTags = core.getInput('tags')
 const tagName = core.getInput('tag_name')
 const latest = core.getInput('latest')
 const imageName = core.getInput('image_name')
