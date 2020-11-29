@@ -15,3 +15,8 @@ exports.getIdentifier = (identifier, raw) => {
       return raw.slice(raw.search(multi), raw.length)
   }
 }
+
+exports.getInputBoolean = (input) => {
+  let boolTest = RegExp('true', 'i')
+  return boolTest.test(input)
+}
