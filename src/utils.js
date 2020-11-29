@@ -17,5 +17,6 @@ exports.getIdentifier = (identifier, raw) => {
 }
 
 exports.getInputBoolean = (input) => {
-  return /true/i.test(core.getInput(input) || 'false')
+  let boolTest = RegExp('true', 'i')
+  return boolTest.test(input)
 }
