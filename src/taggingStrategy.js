@@ -9,7 +9,7 @@ exports.taggingStrategy = ({inputTags, latest, tagName, imageName}) => {
         return imageName ? [...tags, `${imageName}:${tag.tag}`] : [...tags, tag.tag]
       }, [])
     
-    if(latest !== 'false'){
+    if(/true/i.test(latest)){
       imageName ? outputTags.push(`${imageName}:latest`) : outputTags.push('latest')
     }
     return outputTags.join(',')

@@ -10,9 +10,9 @@ const github = __webpack_require__(2943)
 const {taggingStrategy} = __webpack_require__(1457)
 const {getInputBoolean} = __webpack_require__(1440)
 
-const inputTags = getInputBoolean(core.getInput('tags'))
+const inputTags = core.getInput('tags')
 const tagName = core.getInput('tag_name')
-const latest = core.getInput('latest')
+const latest = getInputBoolean(core.getInput('latest') || 'false')
 const imageName = core.getInput('image_name')
 
 try {
@@ -8042,7 +8042,7 @@ exports.taggingStrategy = ({inputTags, latest, tagName, imageName}) => {
         return imageName ? [...tags, `${imageName}:${tag.tag}`] : [...tags, tag.tag]
       }, [])
     
-    if(latest !== 'false'){
+    if(/true/i.test(latest)){
       imageName ? outputTags.push(`${imageName}:latest`) : outputTags.push('latest')
     }
     return outputTags.join(',')
