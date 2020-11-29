@@ -17,5 +17,5 @@ exports.getIdentifier = (identifier, raw) => {
 }
 
 exports.getInputBoolean = (input) => {
-  return /true/i.test(core.getInput(input)) || false
+  return /true/i.test(core.getInput(input) || 'false')
 }
