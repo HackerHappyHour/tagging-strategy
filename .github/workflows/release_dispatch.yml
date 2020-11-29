@@ -1,24 +1,40 @@
-name: Release Dispatch
+name: Test
 
 on:
   repository_dispatch:
     types: [release]
+  push:
 
 jobs:
   debug:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        image-tagging-strategy: ['%X%-foobar', '%X.Y%-foobar', '%X.Y.Z%-foobar']
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: tagging
-        id: tagging
+      - name: Tags w/latest
+        id: tags-latest
         uses: ./
         with:
-          pattern: "${{ matrix.image-tagging-strategy }}"
-          tag_name: "${{ github.event.client_payload.tag_name }}"
-      - name: Use Tag
-        run: echo ${{ steps.tagging.outputs.tag }}
+          latest: true
+          tags: |
+            %x%
+            %X.Y%
+            %X.Y.Z%
+          image_name: hello/world
+          tag_name: 1.0.0rc1
+      - name: Use latest Tags
+        run: echo ${{ steps.tags-latest.outputs.tags }}
+      - name: Tags w/o latest
+        id: tags-wo-latest
+        uses: ./
+        with:
+          latest: false
+          tags: |
+            %x%
+            %X.Y%
+            %X.Y.Z%
+          image_name: hello/world
+          tag_name: 1.0.0rc1
+      - name: Use Tags w/o latest
+        run: echo ${{ steps.tags-wo-latest.outputs.tags }}
