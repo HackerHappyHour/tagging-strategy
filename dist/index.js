@@ -8,8 +8,9 @@ module.exports =
 const core = __webpack_require__(5330)
 const github = __webpack_require__(2943)
 const {taggingStrategy} = __webpack_require__(1457)
+const {getInputBoolean} = __webpack_require__(1440)
 
-const inputTags = core.getInput('tags')
+const inputTags = getInputBoolean(core.getInput('tags'))
 const tagName = core.getInput('tag_name')
 const latest = core.getInput('latest')
 const imageName = core.getInput('image_name')
@@ -8041,7 +8042,7 @@ exports.taggingStrategy = ({inputTags, latest, tagName, imageName}) => {
         return imageName ? [...tags, `${imageName}:${tag.tag}`] : [...tags, tag.tag]
       }, [])
     
-    if(latest){
+    if(latest !== 'false'){
       imageName ? outputTags.push(`${imageName}:latest`) : outputTags.push('latest')
     }
     return outputTags.join(',')
@@ -8074,6 +8075,11 @@ exports.getIdentifier = (identifier, raw) => {
     default:
       return raw.slice(raw.search(multi), raw.length)
   }
+}
+
+exports.getInputBoolean = (input) => {
+  let boolTest = RegExp('true', 'i')
+  return boolTest.test(input)
 }
 
 
