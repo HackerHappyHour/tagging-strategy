@@ -15,3 +15,7 @@ exports.getIdentifier = (identifier, raw) => {
       return raw.slice(raw.search(multi), raw.length)
   }
 }
+
+exports.getInputBoolean = (input) => {
+  return /true/i.test(core.getInput(input)) || false
+}

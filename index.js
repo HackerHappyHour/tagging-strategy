@@ -1,10 +1,10 @@
 const core = require('@actions/core')
 const github = require('@actions/github')
 const {taggingStrategy} = require('./src/taggingStrategy')
-
+const {getInputBoolean} = require('./src/utils')
 const inputTags = core.getInput('tags')
 const tagName = core.getInput('tag_name')
-const latest = core.getInput('latest')
+const latest = getInputBoolean('latest')
 const imageName = core.getInput('image_name')
 
 try {
