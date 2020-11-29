@@ -6,8 +6,8 @@ branding:
 inputs:
   latest:
     description: 'whether or not to produce a latest tag'
-    required: true
-    default: false
+    required: false
+    default: 'false'
   tags:
     description: 'The tagging strategy for this run'
     required: true
