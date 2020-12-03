@@ -20,3 +20,11 @@ exports.getInputBoolean = (input) => {
   let boolTest = RegExp('true', 'i')
   return boolTest.test(input)
 }
+
+exports.conditionalTagFilter = (tag) => {
+  const isConditionalTag = /(?<=::)('true'|true|'false'|false)/ig
+  if (isConditionalTag.test(tag)){
+    return tag.match(isConditionalTag)
+  }
+  return tag
+}
