@@ -4,7 +4,6 @@ const {getIdentifier} = require('./utils')
 const {invalidTag} = require('./errors')
 
 const matcher = /(%(?<strategy>(?<major>x?)\.?(?<minor>y?)\.?(?<patch>z?))%)(?<variant>.*)/ig
-const latest = /^latest*/
 
 exports.parseTag = (pattern, tag) => {
   let Tag = {}

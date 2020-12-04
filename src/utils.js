@@ -23,8 +23,11 @@ exports.getInputBoolean = (input) => {
 
 exports.conditionalTagFilter = (tag) => {
   const isConditionalTag = /(?<=::)('true'|true|'false'|false)/ig
-  if (isConditionalTag.test(tag)){
-    return tag.match(isConditionalTag)
+  
+  // tag has condition specified, so only return 
+  //the tag if the condition is true
+  if(tag.match(isConditionalTag)){
+    return /true/i.test(tag) || false
   }
   return tag
 }

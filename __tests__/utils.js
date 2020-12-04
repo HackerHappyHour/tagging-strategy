@@ -15,3 +15,7 @@ describe('getInputList', ()=>{
   })
 
 })
+
+describe('getIdentifier', () => {
+
+})
