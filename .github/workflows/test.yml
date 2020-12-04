@@ -42,7 +42,7 @@ jobs:
         with:
           latest: false
           tags: |
-            %x%::true
+            %x%::'true'
             %X.Y%::'false'
             %X.Y.Z%
           image_name: hello/world
