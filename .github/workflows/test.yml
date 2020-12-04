@@ -35,17 +35,17 @@ jobs:
           image_name: hello/world
           tag_name: 1.0.0rc1
       - name: Use latest Tags
-        run: echo ${{ github.event.action }} will output ${{ steps.tags-latest.outputs.tags }}
+        run: echo ${{ github.event_name }} will output ${{ steps.tags-latest.outputs.tags }}
       - name: Tags w/o latest
         id: tags-wo-latest
         uses: ./
         with:
           latest: false
           tags: |
-            %x%::${{ github.event.action == 'push'}}
+            %x%::${{ github.event_name == 'push'}}
             %X.Y%::'false'
             %X.Y.Z%
           image_name: hello/world
           tag_name: 1.0.0rc1
       - name: Use Tags w/o latest
-        run: echo ${{ github.event.action }} will output ${{ steps.tags-wo-latest.outputs.tags }}
+        run: echo ${{ github.event_name }} will output ${{ steps.tags-wo-latest.outputs.tags }}
