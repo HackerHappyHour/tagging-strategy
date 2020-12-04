@@ -3,10 +3,12 @@ const {conditionalTagFilter, getInputList} = require('./utils')
 
 exports.taggingStrategy = ({inputTags, latest, tagName, imageName}) => {
   try {
-    let rawInputTags = getInputList(inputTags)
-    let outputTags = rawInputTags
+    let outputTags = getInputList(inputTags)
       .filter(conditionalTagFilter)
-      .map(tag => parseTag(tag, tagName, imageName))
+      .map(strategy => {
+        if (/true/i.test(strategy)) console.log('condition found in filtered strategy', strategy )
+        return parseTag(strategy, tagName)
+      })
       .reduce((tags,tag) => {
         return imageName ? [...tags, `${imageName}:${tag.tag}`] : [...tags, tag.tag]
       }, [])

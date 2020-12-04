@@ -1,5 +1,5 @@
-const {getInputBoolean, getInputList} = require('../src/utils')
-const {getInputBooleanScenarios, getInputListScenarios} = require('./__data__/utils')
+const {getInputBoolean, getInputList, conditionalTagFilter} = require('../src/utils')
+const {conditionalTagFilterScenarios, getInputBooleanScenarios, getInputListScenarios} = require('./__data__/utils')
 
 describe('getInputBoolean', () => {
   test.each(getInputBooleanScenarios)('%s should be %s', (scenario, expected) => {
@@ -16,6 +16,9 @@ describe('getInputList', ()=>{
 
 })
 
-describe('getIdentifier', () => {
+describe('conditionalTagFilter', () => {
+  test.each(conditionalTagFilterScenarios)('expect %s to be %s', (given, expected) => {
+    expect(conditionalTagFilter(given)).toEqual(expected)
+  })
 
 })

@@ -22,13 +22,20 @@ exports.getInputBoolean = (input) => {
 }
 
 exports.conditionalTagFilter = (tag) => {
-  const isConditionalTag = /(?<=::)('true'|true|'false'|false)/ig
+  const isConditionalTag = /(?<strategy>.*)::'?(?<include>true|false)/i
   
   // tag has condition specified, so only return 
   //the tag if the condition is true
-  if(tag.match(isConditionalTag)){
-    return /true/i.test(tag) || false
-  }
+  if(isConditionalTag.test(tag)){
+    let {groups} = tag.match(isConditionalTag)
+    if(groups.include == ('true'||true)) {
+      console.log('returning conditional strategy that resolved to true', groups.strategy)
+      return groups.strategy
+    } else {
+      return false
+    }
+  } 
+
   return tag
 }
 
