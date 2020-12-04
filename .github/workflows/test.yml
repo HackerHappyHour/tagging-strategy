@@ -35,7 +35,7 @@ jobs:
           image_name: hello/world
           tag_name: 1.0.0rc1
       - name: Use latest Tags
-        run: echo ${{ steps.tags-latest.outputs.tags }}
+        run: echo ${{ github.event.action }} will output ${{ steps.tags-latest.outputs.tags }}
       - name: Tags w/o latest
         id: tags-wo-latest
         uses: ./
@@ -48,4 +48,4 @@ jobs:
           image_name: hello/world
           tag_name: 1.0.0rc1
       - name: Use Tags w/o latest
-        run: echo ${{ steps.tags-wo-latest.outputs.tags }}
+        run: echo ${{ github.event.action }} will output ${{ steps.tags-wo-latest.outputs.tags }}
