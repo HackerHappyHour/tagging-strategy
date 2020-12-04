@@ -6,3 +6,8 @@ exports.getInputBooleanScenarios = [
   ['FALSE', false],
   ['fALse', false]
 ]
+
+exports.getInputListScenarios = [
+  ['%X%', ['%X%']],
+  ['%X%,%X.Y%', ['%X%', '%X.Y%']]
+]

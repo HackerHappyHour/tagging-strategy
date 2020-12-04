@@ -38,18 +38,3 @@ exports.parseTag = (pattern, tag) => {
   }
   return Tag
 }
-
-exports.parseInputList = (name) => {
-  try {
-    if (name.length < 1) {
-      throw 'tag list required'
-    }
-    return name
-      .split(/\r?\n/)
-      .filter(x => x)
-      .reduce((acc, line) => acc.concat(line.split(',').filter(x => x)).map(pat => pat.trim()), [])
-
-  } catch (e) {
-    return e
-  }
-}

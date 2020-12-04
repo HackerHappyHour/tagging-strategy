@@ -10,7 +10,3 @@ exports.parseTagScenarios = [
   ['%X.Y%', '2.0.0rc3', '2.0-rc3']
 ]
 
-exports.parseInputListScenarios = [
-  ['%X%', ['%X%']],
-  ['%X%,%X.Y%', ['%X%', '%X.Y%']]
-]

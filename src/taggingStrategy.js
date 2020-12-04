@@ -1,8 +1,9 @@
-const {parseTag, parseInputList, conditionalTagFilter} = require('./parser')
+const {parseTag} = require('./parseTag')
+const {conditionalTagFilter, getInputList} = require('./utils')
 
 exports.taggingStrategy = ({inputTags, latest, tagName, imageName}) => {
   try {
-    let rawInputTags = parseInputList(inputTags)
+    let rawInputTags = getInputList(inputTags)
     let outputTags = rawInputTags
       .filter(conditionalTagFilter)
       .map(tag => parseTag(tag, tagName, imageName))

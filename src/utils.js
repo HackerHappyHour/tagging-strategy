@@ -28,3 +28,14 @@ exports.conditionalTagFilter = (tag) => {
   }
   return tag
 }
+
+exports.getInputList = (list) => {
+    if (list.length < 1) {
+      return []
+    }
+
+    return list
+      .split(/\r?\n/)
+      .filter(x => x)
+      .reduce((acc, line) => acc.concat(line.split(',').filter(x => x)).map(pat => pat.trim()), [])
+}
