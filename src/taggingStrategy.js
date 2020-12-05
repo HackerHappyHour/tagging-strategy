@@ -5,9 +5,7 @@ exports.taggingStrategy = ({inputTags, latest, tagName, imageName, extraTags}) =
   try {
     let outputTags = getInputList(inputTags)
       .reduce(conditionalTagsReducer, [])
-      .map(strategy => {
-        return parseTag(strategy, tagName)
-      })
+      .map(strategy => parseTag(strategy, tagName))
       .reduce(imageNameReducer(imageName), [])
     
     if (extraTags) {
