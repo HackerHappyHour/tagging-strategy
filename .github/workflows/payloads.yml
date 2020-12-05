@@ -13,4 +13,4 @@ jobs:
     -
       run: |
         echo "github.event_name ${{ github.event_name }}"
-        echo "github.action.event ${{ github.action.event }}"
+        echo "github.action ${{ github.action }}"
