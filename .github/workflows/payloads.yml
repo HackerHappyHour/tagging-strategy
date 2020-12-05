@@ -1,0 +1,16 @@
+name: Payloads Debug
+
+on:
+  push:
+  repository_dispatch:
+    types: [release]
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+
+    steps:
+    -
+      run: |
+        echo "github.event_name ${{ github.event_name }}"
+        echo "github.action.event ${{ github.action.event }}"
