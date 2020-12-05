@@ -17,5 +17,5 @@ jobs:
       run: echo "github.ref ${{ github.ref }}"
 
     - name: test github.sha payload
-      run: echo "github.sha ${{ github.ref }}"
+      run: echo "github.sha ${{ github.sha }}"
         
