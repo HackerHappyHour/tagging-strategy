@@ -67,4 +67,12 @@ exports.scenarios = [
     'hello/world:1-rc1-foobar,hello/world:1.0-rc1-foobar,hello/world:1.0.0-rc1-foobar',
     {inputTags:'%X%-foobar,%X.Y%-foobar,%X.Y.Z%-foobar', tagName:'1.0.0rc1', imageName: 'hello/world'}
   ],
+  [
+    'hello/world:1-rc1-foobar,hello/world:1.0-rc1-foobar,hello/world:1.0.0-rc1-foobar,hello/world:latest,hello/world:edge',
+    {inputTags:'%X%-foobar,%X.Y%-foobar,%X.Y.Z%-foobar', tagName:'1.0.0rc1', imageName: 'hello/world', extraTags: 'latest,edge'}
+  ],
+  [
+    'hello/world:1-rc1-foobar,hello/world:1.0-rc1-foobar,hello/world:1.0.0-rc1-foobar,hello/world:edge',
+    {inputTags:'%X%-foobar,%X.Y%-foobar,%X.Y.Z%-foobar', tagName:'1.0.0rc1', imageName: 'hello/world', extraTags: 'latest::false,edge::true'}
+  ],
 ]
