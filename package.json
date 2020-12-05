@@ -1,6 +1,6 @@
 {
   "name": "tagging-strategy",
-  "version": "2.2.0",
+  "version": "3.0.0-rc2",
   "description": "A github action for specifying tagging strategies for docker images using semver or other common docker tags",
   "main": "dist/index.js",
   "scripts": {
@@ -23,7 +23,6 @@
   "homepage": "https://github.com/HackerHappyHour/tagging-strategy#readme",
   "dependencies": {
     "@actions/core": "^1.2.4",
-    "@actions/github": "^4.0.0",
     "semver": "^7.3.2"
   },
   "devDependencies": {
