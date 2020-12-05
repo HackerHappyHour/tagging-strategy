@@ -21,21 +21,19 @@ exports.getInputBoolean = (input) => {
   return boolTest.test(input)
 }
 
-exports.conditionalTagsReducer = (tags,tag) => {
-  const isConditionalTag = /(?<strategy>.*)::'?(?<include>true|false)/i
-  
+exports.tagsReducer = (tags,tag) => {
+  let isConditionalTag = tag.search('::')
   // tag has condition specified, so only return 
   //the tag if the condition is true
-  if(isConditionalTag.test(tag)){
-    let {groups} = tag.match(isConditionalTag)
-    if(groups.include == ('true'||true)) {
-      return [...tags, groups.strategy]
+  if(isConditionalTag > -1){
+    if(/true/i.test(tag)){
+      return [...tags, tag.substr(0, isConditionalTag)]
     } else {
       return tags
     }
-  } 
-
-  return [...tags, tag]
+  } else {
+    return [...tags, tag]
+  }
 }
 
 exports.getInputList = (list) => {
@@ -47,4 +45,11 @@ exports.getInputList = (list) => {
       .split(/\r?\n/)
       .filter(x => x)
       .reduce((acc, line) => acc.concat(line.split(',').filter(x => x)).map(pat => pat.trim()), [])
+}
+
+exports.imageNameReducer = (imageName) => {
+  return (tags, tag) => {
+    return imageName ? [...tags, `${imageName}:${tag.tag}`] : [...tags, tag.tag]
+  }
+
 }

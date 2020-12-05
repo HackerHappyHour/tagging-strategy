@@ -1,5 +1,5 @@
-const {getInputBoolean, getInputList, conditionalTagsReducer} = require('../src/utils')
-const {conditionalTagsReducerScenarios, getInputBooleanScenarios, getInputListScenarios} = require('./__data__/utils')
+const {tagsReducer, getInputBoolean, getInputList} = require('../src/utils')
+const {getInputBooleanScenarios, getInputListScenarios} = require('./__data__/utils')
 
 describe('getInputBoolean', () => {
   test.each(getInputBooleanScenarios)('%s should be %s', (scenario, expected) => {
@@ -16,9 +16,11 @@ describe('getInputList', ()=>{
 
 })
 
-describe.skip('conditionalTagFilter', () => {
+describe('tagsReducer', () => {
   test('reduces imperative booleans',() => {
-    let inputTags = ['%X%', '%X.Y%::true', '%X.Y.Z%::false', '%X%-foobar::false', '%X.Y%-foobar::true']
-    expect(inputTags.reduce(conditionalTagsReducer)).toEqual(['%X%', '%X.Y%','%X.Y%-foobar'])
+
+    let extraTagsOutput = ['latest::true', 'edge::true', 'canary::false'].reduce(tagsReducer, [])
+    expect(extraTagsOutput).toEqual(['latest', 'edge'])
   })
+
 })
