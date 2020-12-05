@@ -27,7 +27,6 @@ attached to the tags.
 | Name             | Type    | Required   | Description                        |
 |------------------|---------|------------|------------------------------------|
 | `image_name`        | `String` | no | an image to pass to tags for docker, omit if not using for docker images | 
-| `latest`        | `Boolean` | yes (default `false`)| The strategies to parse the tag paylod with |
 | `tags`        | [csv/list of strategies](#strategy-parsing), optionally add `::<Boolean>` | yes | The strategies to parse the tag paylod with. See [conditionally including a strategy](#conditionally-including-a-strategy) to learn how to use conditional expressions for each strategy|
 | `tag_name` | `String` | yes (default is `X.Y.Z`) | A semver parseable string |
 | `extra_tags` | `csv/list` | no | Optional extra tags appended to output list of tags. These are not parsed by semver, but support conditional expressions |
@@ -53,10 +52,10 @@ steps:
     id: tagging-strategy
     uses: HackerHappyHour/tagging-strategy@v2
     with:
-      latest: true
       tags: '%X%, %X%-debian, %X.Y%, %X.Y%-debian'
       tag_name: '1.0.0'
       image_name: hello/world
+      extra_tags: 'latest,debian,edge'
 
   - 
     uses: docker/setup-buildx-action@v1
@@ -76,6 +75,26 @@ The example above would result in a multi-platform image where the digests for e
 Tag
 ===
 latest
+
+Digest                    OS/ARCH
+======                    =======
+57f8a1d499bb              linux/amd64
+7fbe9ad1fbc6              linux/arm/v7
+ff87a758e329              linux/arm64
+
+Tag
+===
+debian
+
+Digest                    OS/ARCH
+======                    =======
+57f8a1d499bb              linux/amd64
+7fbe9ad1fbc6              linux/arm/v7
+ff87a758e329              linux/arm64
+
+Tag
+===
+edge
 
 Digest                    OS/ARCH
 ======                    =======
@@ -153,11 +172,11 @@ steps:
       uses: HackerHappyHour/tagging-strategy@v2
       if: ${{ github.event_name == 'release' }}
       with:
-        latest: true
         tags: |
           %X%-foobar::${{ github.event.action != 'prerelease' }}
           %X.Y%-foobar::${{ github.event.action != 'prerelease' }}
           %X.Y.Z%-foobar
+        extra_tags: 'latest'
 ```
 
 #### Pattern
@@ -179,7 +198,6 @@ Valid pattern examples include:
 
 Sections of the pattern are denoted using `%`. Currently only `X`, `Y`, and `Z` will be translated.
 
-`latest` - returns `latest`  
 `X` - returns Major version  
 `Y` - returns Minor version  
 `Z` - returns Patch version  
@@ -216,6 +234,7 @@ All of the features supported by this plugin are used in the [OctoPrint/octoprin
 Check it out for the best example of the flexibility and power this action provides.
 
 ### From Release on repo 
+
 ```yaml
 jobs:
   myReleaseExample:
@@ -229,13 +248,14 @@ jobs:
       uses: HackerHappyHour/tagging-strategy@v2
       if: ${{ github.event_name == 'release' }}
       with:
-        latest: true
         tags: |
           %X%-foobar
           %X.Y%-foobar
           %X.Y.Z%-foobar
         tag_name: ${{ github.ref }}
         image_name: foo/bar
+        extra_tags: |
+          latest
     - name: Setup Buildx
       id: setup
       uses: crazy-max/ghaction-docker-buildx@v3
@@ -294,13 +314,14 @@ jobs:
         id: tagging
         uses: HackerHappyHour/tagging-strategy@v2
         with:
-          latest: github.event_type
           tags: |
             %X%-foobar
             %X.Y%-foobar
             %X.Y.Z%-foobar
           tag_name: ${{ github.event.client_payload.tag_name }}
           image_name: foo/bar
+          extra_tags: |
+            latest
       - name: Use Tag
         run: echo ${{ steps.tagging.outputs.tags }}
 
@@ -318,7 +339,10 @@ steps:
   id: tags
   uses: HackerHappyHour/tagging-strategy@v2
   with:
-    latest: ${{ github.event_name  == 'push'}}
+    tags: |
+      %X%
+    extra_tags: | 
+      latest::${{ github.event_name  == 'push'}}
 ```
 
 [docker-build-and-push]: https://github.com/docker/build-push-action
