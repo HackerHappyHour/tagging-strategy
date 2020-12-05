@@ -7,7 +7,11 @@ exports.taggingStrategy = ({inputTags, latest, tagName, imageName, extraTags}) =
       .reduce(conditionalTagsReducer, [])
       .map(strategy => parseTag(strategy, tagName))
       .reduce(imageNameReducer(imageName), [])
-    
+  } catch (error) {
+    return `Unable to parse input: tags...\n${error}`
+  }
+
+  try {
     if (extraTags) {
       // reduce conditionalTags for extraTags
       // reduce imageNames for extraTags
@@ -17,14 +21,11 @@ exports.taggingStrategy = ({inputTags, latest, tagName, imageName, extraTags}) =
         .reduce(imageNameReducer(imageName),[])
         .forEach(tag => outputTags.push(tag))
     }
-
-    if(/true/i.test(latest)){
-      imageName ? outputTags.push(`${imageName}:latest`) : outputTags.push('latest')
-    }
-    return outputTags.join(',')
-
-  } catch (error) {
-    return `tagging-strategy was unable to parse your tags...\n${error}`
   }
+  catch (error) {
+    return `Unable to parse input: extra_tags...\n${error}`
+  }
+
+  return outputTags.join(',')
 
 }
