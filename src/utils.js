@@ -48,3 +48,10 @@ exports.getInputList = (list) => {
       .filter(x => x)
       .reduce((acc, line) => acc.concat(line.split(',').filter(x => x)).map(pat => pat.trim()), [])
 }
+
+exports.imageNameReducer = (imageName) => {
+  return (tags, tag) => {
+    return imageName ? [...tags, `${imageName}:${tag.tag}`] : [...tags, tag.tag]
+  }
+
+}
