@@ -1,4 +1,4 @@
-const {extraTagsReducer, getInputBoolean, getInputList, conditionalTagsReducer} = require('../src/utils')
+const {tagsReducer, getInputBoolean, getInputList} = require('../src/utils')
 const {getInputBooleanScenarios, getInputListScenarios} = require('./__data__/utils')
 
 describe('getInputBoolean', () => {
@@ -16,10 +16,10 @@ describe('getInputList', ()=>{
 
 })
 
-describe('extraTagsReducer', () => {
+describe('tagsReducer', () => {
   test('reduces imperative booleans',() => {
 
-    let extraTagsOutput = ['latest::true', 'edge::true', 'canary::false'].reduce(extraTagsReducer, [])
+    let extraTagsOutput = ['latest::true', 'edge::true', 'canary::false'].reduce(tagsReducer, [])
     expect(extraTagsOutput).toEqual(['latest', 'edge'])
   })
 

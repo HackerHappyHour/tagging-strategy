@@ -21,24 +21,7 @@ exports.getInputBoolean = (input) => {
   return boolTest.test(input)
 }
 
-exports.conditionalTagsReducer = (tags,tag) => {
-  const isConditionalTag = /(?<strategy>.*)::'?(?<include>true|false)/i
-  
-  // tag has condition specified, so only return 
-  //the tag if the condition is true
-  if(isConditionalTag.test(tag)){
-    let {groups} = tag.match(isConditionalTag)
-    if(groups.include == ('true'||true)) {
-      return [...tags, groups.strategy]
-    } else {
-      return tags
-    }
-  } 
-
-  return [...tags, tag]
-}
-
-exports.extraTagsReducer = (tags,tag) => {
+exports.tagsReducer = (tags,tag) => {
   let isConditionalTag = tag.search('::')
   // tag has condition specified, so only return 
   //the tag if the condition is true
