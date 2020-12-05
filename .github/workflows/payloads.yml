@@ -14,5 +14,8 @@ jobs:
       run: echo "github.event_name ${{ github.event_name }}"
         
     - name: test github.ref payload
-      run: echo "github.action ${{ github.ref }}"
+      run: echo "github.ref ${{ github.ref }}"
+
+    - name: test github.sha payload
+      run: echo "github.sha ${{ github.ref }}"
         
