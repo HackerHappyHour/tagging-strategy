@@ -5,12 +5,28 @@ exports.scenarios = [
     {inputTags:'%X%,%X.Y%,%X.Y.Z%', tagName:'1.0.0'}
   ],
   [
+    '1.0.0',
+    {inputTags:'%X%::false,%X.Y%::false,%X.Y.Z%', tagName:'1.0.0'}
+  ],
+  [
     'foo/bar:1,foo/bar:1.0,foo/bar:1.0.0',
-    {inputTags:'%X%,%X.Y%,%X.Y.Z%', tagName:'1.0.0', imageName: 'foo/bar'}
+    {inputTags:'%X%,%X.Y%,%X.Y.Z%::true', tagName:'1.0.0', imageName: 'foo/bar'}
+  ],
+  [
+    'foo/bar:1,foo/bar:1.0.0',
+    {inputTags:'%X%,%X.Y%::\'false\',%X.Y.Z%::\'true\'', tagName:'1.0.0', imageName: 'foo/bar'}
+  ],
+  [
+    'foo/bar:1,foo/bar:1.0.0',
+    {inputTags:'%X%,%X.Y%::\'false\',%X.Y.Z%::true', tagName:'1.0.0', imageName: 'foo/bar'}
   ],
   [
     'foo/bar:1,foo/bar:1.0,foo/bar:1.0.0,foo/bar:latest',
     {inputTags:'%X%,%X.Y%,%X.Y.Z%', tagName:'1.0.0', imageName: 'foo/bar', latest: 'TRUE'}
+  ],
+  [
+    'foo/bar:1.0,foo/bar:1.0.0,foo/bar:latest',
+    {inputTags:'%X%::false,%X.Y%::true,%X.Y.Z%::\'true\'', tagName:'1.0.0', imageName: 'foo/bar', latest: 'TRUE'}
   ],
   [
     '1,1.0,1.0.0,latest',
@@ -26,6 +42,10 @@ exports.scenarios = [
   [
     'hello/world:1-foobar,hello/world:1.0-foobar,hello/world:1.0.0-foobar,hello/world:latest',
     {inputTags:'%X%-foobar,%X.Y%-foobar,%X.Y.Z%-foobar', tagName:'1.0.0', latest: 'true', imageName: 'hello/world'}
+  ],
+  [
+    'hello/world:1-foobar,hello/world:1.0.0-foobar,hello/world:latest',
+    {inputTags:'%X%-foobar,%X.Y%-foobar::false,%X.Y.Z%-foobar', tagName:'1.0.0', latest: 'true', imageName: 'hello/world'}
   ],
   [
     '1-rc1,1.0-rc1,1.0.0-rc1',

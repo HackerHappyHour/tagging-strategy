@@ -20,3 +20,31 @@ exports.getInputBoolean = (input) => {
   let boolTest = RegExp('true', 'i')
   return boolTest.test(input)
 }
+
+exports.conditionalTagsReducer = (tags,tag) => {
+  const isConditionalTag = /(?<strategy>.*)::'?(?<include>true|false)/i
+  
+  // tag has condition specified, so only return 
+  //the tag if the condition is true
+  if(isConditionalTag.test(tag)){
+    let {groups} = tag.match(isConditionalTag)
+    if(groups.include == ('true'||true)) {
+      return [...tags, groups.strategy]
+    } else {
+      return tags
+    }
+  } 
+
+  return [...tags, tag]
+}
+
+exports.getInputList = (list) => {
+    if (list.length < 1) {
+      return []
+    }
+
+    return list
+      .split(/\r?\n/)
+      .filter(x => x)
+      .reduce((acc, line) => acc.concat(line.split(',').filter(x => x)).map(pat => pat.trim()), [])
+}

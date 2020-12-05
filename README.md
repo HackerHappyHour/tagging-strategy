@@ -5,24 +5,15 @@ a single raw semver compatible tag.
 
 Best used for creating docker tags, but creates a comma separated list of strings for whatever uses you may have.
 
-**Note:** This project has a lot of overlap with [crazy-max/ghaction-docker-meta](), and may eventually be sunset
-entirely in favor of that action.  I highly encourage you to check that action out as well.
-
-That action has much more support for docker specific build manipulation, and may be better for your needs.
-
-Currently the things _this_ project has that ghaction-docker-meta doesn't support (yet) are:
-- tag suffixes/variants (support pending via [PR #15](https://github.com/crazy-max/ghaction-docker-meta/pull/15))
-- explicit `latest` control (see discussion/track via [crazy-max/ghaction-docker-meta/issues/19](https://github.com/crazy-max/ghaction-docker-meta/issues/19) )
-- completely event agnostic 
-
-I am working with the author and collaborators of that project to add several of those features, and may eventually archive
-this action once those features are available
+This action supports dynamically resolving whether or not to render each pattern provided using github expressions
+attached to the tags.
 
 - [Tagging Strategy](#tagging-strategy)
   - [Inputs](#inputs)
   - [Outputs](#outputs)
   - [Usage](#usage)
     - [Strategy Parsing](#strategy-parsing)
+      - [Conditionally Including a Strategy](#conditionally-including-a-strategy)
       - [Pattern](#pattern)
       - [Prerelease](#prerelease)
       - [Variant](#variant)
@@ -37,7 +28,7 @@ this action once those features are available
 |------------------|---------|------------|------------------------------------|
 | `image_name`        | `String` | no | an image to pass to tags for docker, omit if not using for docker images | 
 | `latest`        | `Boolean` | yes (default `false`)| The strategies to parse the tag paylod with |
-| `tags`        | [csv/list of strategies](#strategy-parsing) | yes | The strategies to parse the tag paylod with |
+| `tags`        | [csv/list of strategies](#strategy-parsing), optionally add `::<Boolean>` | yes | The strategies to parse the tag paylod with. See [conditionally including a strategy](#conditionally-including-a-strategy) to learn how to specify conditions for each strategy|
 | `tag_name` | `String` | yes (default is `X.Y.Z`) | A semver parseable string |
 
 
@@ -139,6 +130,34 @@ ff87a758e329              linux/arm64
 
 The forumula for each individual entry of the `tags` input: `pattern`+`<prerelease>`+`<variant>`
 
+#### Conditionally Including a Strategy
+You can also add a `::<Boolean>` on the end of each tag provided, which allows you to dynamically specify
+conditions for which each strategy provided is included. This allows you to use github action [expressions][expressions]
+that resolve to `true` or `false` to conditionally specify whether or not to include a given strategy in the output.
+
+For example, let's say you have a workflows that triggers on both `prereleased` and `released` events. For a normal 
+release you want to produce `X`, `X.Y`, and `X.Y.Z` for the given `tag_name`, but if it's a prerelease, you don't want
+to produce the `X` or `X.Y` tags.
+
+```yaml
+on:
+  release:
+    types: [prereleased, released]
+steps:
+    # checkout steps etc...
+    # Image Tagger
+    - name: Image Tag Strategy
+      id: tagging
+      uses: HackerHappyHour/tagging-strategy@v2
+      if: ${{ github.event_name == 'release' }}
+      with:
+        latest: true
+        tags: |
+          %X%-foobar::${{ github.event.action != 'prerelease' }}
+          %X.Y%-foobar::${{ github.event.action != 'prerelease' }}
+          %X.Y.Z%-foobar
+```
+
 #### Pattern
 
 A strategy is comprised of a valid or coercable semver pattern, 
@@ -147,7 +166,8 @@ using `X`, `Y`, and `Z`, as well as the word `latest`.
 Valid pattern examples include:
 
 ```
-%X%
+# all strategies below support <strategy>::<Boolean>
+%X%   
 %Z%
 %X.Y.Z%
 %X.Y%
@@ -297,4 +317,5 @@ steps:
 ```
 
 [docker-build-and-push]: https://github.com/docker/build-push-action
+[expressions]: https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions
 [release]: https://docs.github.com/en/actions/reference/events-that-trigger-workflows#release
