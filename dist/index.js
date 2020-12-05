@@ -8851,14 +8851,15 @@ exports.parseTag = (pattern, tag) => {
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 const {parseTag} = __webpack_require__(8283)
-const {conditionalTagFilter, getInputList} = __webpack_require__(1440)
+const {conditionalTagsReducer, getInputList} = __webpack_require__(1440)
 
 exports.taggingStrategy = ({inputTags, latest, tagName, imageName}) => {
   try {
-    let rawInputTags = getInputList(inputTags)
-    let outputTags = rawInputTags
-      .filter(conditionalTagFilter)
-      .map(tag => parseTag(tag, tagName, imageName))
+    let outputTags = getInputList(inputTags)
+      .reduce(conditionalTagsReducer, [])
+      .map(strategy => {
+        return parseTag(strategy, tagName)
+      })
       .reduce((tags,tag) => {
         return imageName ? [...tags, `${imageName}:${tag.tag}`] : [...tags, tag.tag]
       }, [])
@@ -8903,15 +8904,21 @@ exports.getInputBoolean = (input) => {
   return boolTest.test(input)
 }
 
-exports.conditionalTagFilter = (tag) => {
-  const isConditionalTag = /(?<=::)('true'|true|'false'|false)/ig
+exports.conditionalTagsReducer = (tags,tag) => {
+  const isConditionalTag = /(?<strategy>.*)::'?(?<include>true|false)/i
   
   // tag has condition specified, so only return 
   //the tag if the condition is true
-  if(tag.match(isConditionalTag)){
-    return /true/i.test(tag) || false
-  }
-  return tag
+  if(isConditionalTag.test(tag)){
+    let {groups} = tag.match(isConditionalTag)
+    if(groups.include == ('true'||0)) {
+      return [...tags, groups.strategy]
+    } else {
+      return tags
+    }
+  } 
+
+  return [...tags, tag]
 }
 
 exports.getInputList = (list) => {
