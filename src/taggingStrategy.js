@@ -1,12 +1,11 @@
 const {parseTag} = require('./parseTag')
-const {conditionalTagFilter, getInputList} = require('./utils')
+const {conditionalTagsReducer, getInputList} = require('./utils')
 
 exports.taggingStrategy = ({inputTags, latest, tagName, imageName}) => {
   try {
     let outputTags = getInputList(inputTags)
-      .filter(conditionalTagFilter)
+      .reduce(conditionalTagsReducer, [])
       .map(strategy => {
-        if (/true/i.test(strategy)) console.log('condition found in filtered strategy', strategy )
         return parseTag(strategy, tagName)
       })
       .reduce((tags,tag) => {

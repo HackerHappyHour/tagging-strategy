@@ -15,10 +15,6 @@ exports.getInputListScenarios = [
 ]
 
 // [given, expected]
-exports.conditionalTagFilterScenarios = [
-  ['%X%::false', false],
-  ['%X%::true', '%X%'],
-  ['%X%::\'true\'', '%X%'],
-  ['%X.Y.Z%::\'true\'', '%X.Y.Z%'],
-
+exports.conditionalTagsReducerScenarios = [
+  [['%X%', '%X.Y%::true', '%X.Y.Z%::false'],['%X%', '%X.Y%']],
 ]

@@ -21,7 +21,7 @@ exports.getInputBoolean = (input) => {
   return boolTest.test(input)
 }
 
-exports.conditionalTagFilter = (tag) => {
+exports.conditionalTagsReducer = (tags,tag) => {
   const isConditionalTag = /(?<strategy>.*)::'?(?<include>true|false)/i
   
   // tag has condition specified, so only return 
@@ -29,14 +29,13 @@ exports.conditionalTagFilter = (tag) => {
   if(isConditionalTag.test(tag)){
     let {groups} = tag.match(isConditionalTag)
     if(groups.include == ('true'||true)) {
-      console.log('returning conditional strategy that resolved to true', groups.strategy)
-      return groups.strategy
+      return [...tags, groups.strategy]
     } else {
-      return false
+      return tags
     }
   } 
 
-  return tag
+  return [...tags, tag]
 }
 
 exports.getInputList = (list) => {
