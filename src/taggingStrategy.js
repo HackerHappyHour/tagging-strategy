@@ -1,5 +1,5 @@
 const {parseTag} = require('./parseTag')
-const {conditionalTagsReducer, imageNameReducer, getInputList} = require('./utils')
+const {extraTagsReducer, conditionalTagsReducer, imageNameReducer, getInputList} = require('./utils')
 
 exports.taggingStrategy = ({inputTags, tagName, imageName, extraTags}) => {
   try {
@@ -13,7 +13,7 @@ exports.taggingStrategy = ({inputTags, tagName, imageName, extraTags}) => {
       // reduce imageNames for extraTags
       // push the extraTag to outputTags array 
       getInputList(extraTags)
-        .reduce(conditionalTagsReducer, [])
+        .reduce(extraTagsReducer, [])
         .reduce(imageNameReducer(imageName),[])
         .forEach(tag => outputTags.push(tag))
     }
@@ -21,7 +21,7 @@ exports.taggingStrategy = ({inputTags, tagName, imageName, extraTags}) => {
     return outputTags.join(',')
   }
   catch (error) {
-    return `Unable to parse input: extra_tags...\n${error}`
+    return `Unable to parse your tagging strategy...\n${error}`
   }
 
 }

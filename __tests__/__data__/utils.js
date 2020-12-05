@@ -17,4 +17,5 @@ exports.getInputListScenarios = [
 // [given, expected]
 exports.conditionalTagsReducerScenarios = [
   [['%X%', '%X.Y%::true', '%X.Y.Z%::false'],['%X%', '%X.Y%']],
+  [['latest::true'], ['latest']]
 ]

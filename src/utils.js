@@ -38,6 +38,25 @@ exports.conditionalTagsReducer = (tags,tag) => {
   return [...tags, tag]
 }
 
+exports.extraTagsReducer = (tags,tag,i) => {
+  let isConditionalTag = tag.search('::')
+  console.log(`${i}: accumulated tags`, tags)
+  // tag has condition specified, so only return 
+  //the tag if the condition is true
+  if(isConditionalTag > -1){
+    if(/true/i.test(tag)){
+      console.log(`${i}: ${tag.substr(0, isConditionalTag)} to be added to:`,tags)
+      return [...tags, tag.substr(0, isConditionalTag)]
+    } else {
+      console.log(`${i}: skipping tag ${tag}`)
+      return tags
+    }
+  } else {
+    console.log(`${i}: ${tag} to be added to:`,tags)
+    return [...tags, tag]
+  }
+}
+
 exports.getInputList = (list) => {
     if (list.length < 1) {
       return []
