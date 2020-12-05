@@ -38,7 +38,7 @@ exports.conditionalTagsReducer = (tags,tag) => {
   return [...tags, tag]
 }
 
-exports.extraTagsReducer = (tags,tag,i) => {
+exports.extraTagsReducer = (tags,tag) => {
   let isConditionalTag = tag.search('::')
   // tag has condition specified, so only return 
   //the tag if the condition is true

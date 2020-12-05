@@ -4,7 +4,7 @@ const {extraTagsReducer, conditionalTagsReducer, imageNameReducer, getInputList}
 exports.taggingStrategy = ({inputTags, tagName, imageName, extraTags}) => {
   try {
     let outputTags = getInputList(inputTags)
-      .reduce(conditionalTagsReducer, [])
+      .reduce(extraTagsReducer, [])
       .map(strategy => parseTag(strategy, tagName))
       .reduce(imageNameReducer(imageName), [])
 
@@ -14,8 +14,9 @@ exports.taggingStrategy = ({inputTags, tagName, imageName, extraTags}) => {
       // push the extraTag to outputTags array 
       getInputList(extraTags)
         .reduce(extraTagsReducer, [])
-        .reduce(imageNameReducer(imageName),[])
-        .forEach(tag => outputTags.push(tag))
+        .map(extraTag => imageName ? `${imageName}:${extraTag}`: `${extraTag}`)
+        .forEach(extraTag => outputTags.push(extraTag))
+        
     }
 
     return outputTags.join(',')
