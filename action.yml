@@ -18,6 +18,9 @@ inputs:
   image_name:
     description: 'an image to pass to tags for docker, omit if not using with docker'
     required: false
+  extra_tags:
+    description: 'csv/list of extra tags. These are not parsed by semver, but support conditional expressions'
+    required: false
 outputs:
   tags:
     description: 'Outputs a comma-separated list of tags'
