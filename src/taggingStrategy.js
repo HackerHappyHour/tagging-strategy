@@ -1,7 +1,7 @@
 const {parseTag} = require('./parseTag')
 const {conditionalTagsReducer, getInputList} = require('./utils')
 
-exports.taggingStrategy = ({inputTags, latest, tagName, imageName}) => {
+exports.taggingStrategy = ({inputTags, latest, tagName, imageName, extraTags}) => {
   try {
     let outputTags = getInputList(inputTags)
       .reduce(conditionalTagsReducer, [])
@@ -12,6 +12,18 @@ exports.taggingStrategy = ({inputTags, latest, tagName, imageName}) => {
         return imageName ? [...tags, `${imageName}:${tag.tag}`] : [...tags, tag.tag]
       }, [])
     
+    if (extraTags) {
+      // reduce conditionalTags for extraTags
+      // reduce imageNames for extraTags
+      // push the extraTag to outputTags array 
+      getInputList(extraTags)
+        .reduce(conditionalTagsReducer, [])
+        .reduce((tags,tag) => {
+          return imageName ? [...tags, `${imageName}:${tag.tag}`] : [...tags, tag.tag]
+        }, [])
+        .forEach(tag => outputTags.push(tag))
+    }
+
     if(/true/i.test(latest)){
       imageName ? outputTags.push(`${imageName}:latest`) : outputTags.push('latest')
     }
@@ -20,5 +32,9 @@ exports.taggingStrategy = ({inputTags, latest, tagName, imageName}) => {
   } catch (error) {
     return `tagging-strategy was unable to parse your tags...\n${error}`
   }
+
+}
+
+const imageNameReducer = (tags,tag) => {
 
 }
