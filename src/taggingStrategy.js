@@ -2,7 +2,7 @@ const {parseTag} = require('./parseTag')
 const {tagsReducer, imageNameReducer, getInputList} = require('./utils')
 
 exports.taggingStrategy = ({inputTags, tagName, imageName, extraTags}) => {
-  try {
+  try{
     let outputTags = getInputList(inputTags)
       .reduce(tagsReducer, [])
       .map(strategy => parseTag(strategy, tagName))
@@ -20,9 +20,9 @@ exports.taggingStrategy = ({inputTags, tagName, imageName, extraTags}) => {
     }
 
     return outputTags.join(',')
+  } catch (error) {
+    throw error.message
   }
-  catch (error) {
-    core.setFailed(`Unable to parse your tagging strategy`)
-  }
+  let outputTags = getInputList(inputTags)
 
 }

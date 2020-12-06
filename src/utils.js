@@ -22,17 +22,21 @@ exports.getInputBoolean = (input) => {
 }
 
 exports.tagsReducer = (tags,tag) => {
-  let isConditionalTag = /(?<strategy>.*)::'?(?<include>true|false)/i
-  // tag has condition specified, so only return 
-  //the tag if the condition is true
-  if(isConditionalTag.test(tag)){
-    if(/true/i.test(tag)){
-      return [...tags, tag.substr(0, tag.search('::'))]
+  try {
+    let isConditionalTag = /(?<strategy>.*)::'?(?<include>true|false)/i
+    // tag has condition specified, so only return 
+    //the tag if the condition is true
+    if(isConditionalTag.test(tag)){
+      if(/true/i.test(tag)){
+        return [...tags, tag.substr(0, tag.search('::'))]
+      } else {
+        return tags
+      }
     } else {
-      return tags
+      return [...tags, tag]
     }
-  } else {
-    return [...tags, tag]
+  } catch (error){
+    throw `An ${error.name} occured checking for conditional tags: ${error.message}`
   }
 }
 
@@ -48,8 +52,12 @@ exports.getInputList = (list) => {
 }
 
 exports.imageNameReducer = (imageName) => {
-  return (tags, tag) => {
-    return imageName ? [...tags, `${imageName}:${tag.tag}`] : [...tags, tag.tag]
+  try {
+    return (tags, tag) => {
+      return imageName ? [...tags, `${imageName}:${tag.tag}`] : [...tags, tag.tag]
+    }
+  } catch (error){
+    throw `An ${error.name} occured checking for image name: ${error.message}`
   }
 
 }
