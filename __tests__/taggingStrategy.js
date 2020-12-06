@@ -6,3 +6,10 @@ describe.each(scenarios)('produce tags %s given %o', (expected, given) => {
     expect(taggingStrategy(given)).toEqual(expected)
   })
 })
+
+describe('taggingStrategy() error handling', () =>{
+  test('throws when given a conditional tag without a boolean', () => {
+    let given = {tagName: '1.0.0', inputTags: '%X%-foobar::'}
+    expect(() => taggingStrategy(given)).toThrow()
+  })
+})

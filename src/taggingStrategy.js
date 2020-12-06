@@ -21,8 +21,7 @@ exports.taggingStrategy = ({inputTags, tagName, imageName, extraTags}) => {
 
     return outputTags.join(',')
   } catch (error) {
-    throw error.message
+    throw new Error(error.message)
   }
-  let outputTags = getInputList(inputTags)
 
 }
