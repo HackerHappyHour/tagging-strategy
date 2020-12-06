@@ -22,7 +22,7 @@ exports.taggingStrategy = ({inputTags, tagName, imageName, extraTags}) => {
     return outputTags.join(',')
   }
   catch (error) {
-    return `Unable to parse your tagging strategy...\n${error}`
+    core.setFailed(`Unable to parse your tagging strategy`)
   }
 
 }
