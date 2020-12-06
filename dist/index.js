@@ -18,7 +18,6 @@ try {
   core.setOutput('tags', taggingStrategy({inputTags, tagName, imageName, extraTags}))
 } catch (error) {
   core.error(error)
-  core.setFailed(`tagging-strategy was unable to parse your tags...\n${error}`)
 }
 
 
@@ -3437,36 +3436,40 @@ const {invalidTag} = __webpack_require__(941)
 const matcher = /(%(?<strategy>(?<major>x?)\.?(?<minor>y?)\.?(?<patch>z?))%)(?<variant>.*)/ig
 
 exports.parseTag = (pattern, tag) => {
-  let Tag = {}
-  let matches = pattern.matchAll(matcher)
+  try {
+    let Tag = {}
+    let matches = pattern.matchAll(matcher)
 
-    // if 'tag' is valid, attempt to parse it
-  // otherwise error: value is not valid or cannot be coerced
-  var parsedTag = s.parse(s.clean(tag, {loose: true}), {includePrerelease: true})
-  if (!parsedTag){
-    parsedTag = s.parse(s.valid(s.coerce(tag)))
-    if (!parsedTag) return {error: invalidTag}
-  } 
+      // if 'tag' is valid, attempt to parse it
+    // otherwise error: value is not valid or cannot be coerced
+    var parsedTag = s.parse(s.clean(tag, {loose: true}), {includePrerelease: true})
+    if (!parsedTag){
+      parsedTag = s.parse(s.valid(s.coerce(tag)))
+      if (!parsedTag) return {error: invalidTag}
+    } 
 
-  const {major, minor, patch} = parsedTag
-  const identifier = getIdentifier(parsedTag.prerelease, parsedTag.raw) 
+    const {major, minor, patch} = parsedTag
+    const identifier = getIdentifier(parsedTag.prerelease, parsedTag.raw) 
 
-  for(let match of matches){
-    const {major: maj, minor:min, patch:fix, strategy, variant} = match.groups
-    Tag = {...Tag, strategy, variant, identifier, maj, min, fix, major, minor, patch}
+    for(let match of matches){
+      const {major: maj, minor:min, patch:fix, strategy, variant} = match.groups
+      Tag = {...Tag, strategy, variant, identifier, maj, min, fix, major, minor, patch}
 
-    let output = strategy
-    if(maj){output = output.replace(/x/ig, major)}
-    if(min){output = output.replace(/y/ig, minor)}
-    if(fix){output = output.replace(/z/ig, patch)}
-    if(identifier){output = `${output}${identifier}`}
-    if(variant){output = `${output}${variant}`}
-    Tag.tag = output
+      let output = strategy
+      if(maj){output = output.replace(/x/ig, major)}
+      if(min){output = output.replace(/y/ig, minor)}
+      if(fix){output = output.replace(/z/ig, patch)}
+      if(identifier){output = `${output}${identifier}`}
+      if(variant){output = `${output}${variant}`}
+      Tag.tag = output
+    }
+    if(core.isDebug()){
+      core.debug(JSON.stringify(Tag))  
+    }
+    return Tag
+  } catch (error){
+    throw `A ${error.name} occured parsing ${tag} with the pattern ${pattern}: ${error.message}`
   }
-  if(core.isDebug()){
-    core.debug(JSON.stringify(Tag))  
-  }
-  return Tag
 }
 
 
@@ -3479,7 +3482,7 @@ const {parseTag} = __webpack_require__(8283)
 const {tagsReducer, imageNameReducer, getInputList} = __webpack_require__(1440)
 
 exports.taggingStrategy = ({inputTags, tagName, imageName, extraTags}) => {
-  try {
+  try{
     let outputTags = getInputList(inputTags)
       .reduce(tagsReducer, [])
       .map(strategy => parseTag(strategy, tagName))
@@ -3497,9 +3500,8 @@ exports.taggingStrategy = ({inputTags, tagName, imageName, extraTags}) => {
     }
 
     return outputTags.join(',')
-  }
-  catch (error) {
-    return `Unable to parse your tagging strategy...\n${error}`
+  } catch (error) {
+    throw error
   }
 
 }
@@ -3534,17 +3536,24 @@ exports.getInputBoolean = (input) => {
 }
 
 exports.tagsReducer = (tags,tag) => {
-  let isConditionalTag = tag.search('::')
-  // tag has condition specified, so only return 
-  //the tag if the condition is true
-  if(isConditionalTag > -1){
-    if(/true/i.test(tag)){
-      return [...tags, tag.substr(0, isConditionalTag)]
-    } else {
-      return tags
+  try {
+    let isConditionalTag = /(?<strategy>.*)::'?(?<include>true|false)/i
+    if(tag.search('::') > -1 && !isConditionalTag.test(tag)) {
+      throw new Error(`A conditional tag was detected without a resolved boolean value`)
     }
-  } else {
-    return [...tags, tag]
+    // tag has condition specified, so only return 
+    //the tag if the condition is true
+    if(isConditionalTag.test(tag)){
+      if(/true/i.test(tag)){
+        return [...tags, tag.substr(0, tag.search('::'))]
+      } else {
+        return tags
+      }
+    } else {
+      return [...tags, tag]
+    }
+  } catch (error){
+    throw `An ${error.name} occured checking for conditional tags: ${error.message}`
   }
 }
 
@@ -3560,8 +3569,12 @@ exports.getInputList = (list) => {
 }
 
 exports.imageNameReducer = (imageName) => {
-  return (tags, tag) => {
-    return imageName ? [...tags, `${imageName}:${tag.tag}`] : [...tags, tag.tag]
+  try {
+    return (tags, tag) => {
+      return imageName ? [...tags, `${imageName}:${tag.tag}`] : [...tags, tag.tag]
+    }
+  } catch (error){
+    throw `An ${error.name} occured checking for image name: ${error.message}`
   }
 
 }
