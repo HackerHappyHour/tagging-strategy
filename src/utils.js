@@ -22,12 +22,12 @@ exports.getInputBoolean = (input) => {
 }
 
 exports.tagsReducer = (tags,tag) => {
-  let isConditionalTag = tag.search('::')
+  let isConditionalTag = /(?<strategy>.*)::'?(?<include>true|false)/i
   // tag has condition specified, so only return 
   //the tag if the condition is true
-  if(isConditionalTag > -1){
+  if(isConditionalTag.test(tag)){
     if(/true/i.test(tag)){
-      return [...tags, tag.substr(0, isConditionalTag)]
+      return [...tags, tag.substr(0, tag.search('::'))]
     } else {
       return tags
     }
