@@ -11,5 +11,4 @@ try {
   core.setOutput('tags', taggingStrategy({inputTags, tagName, imageName, extraTags}))
 } catch (error) {
   core.error(error)
-  core.setFailed(`tagging-strategy was unable to parse your tags...\n${error}`)
 }

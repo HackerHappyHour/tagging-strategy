@@ -7,7 +7,6 @@ const matcher = /(%(?<strategy>(?<major>x?)\.?(?<minor>y?)\.?(?<patch>z?))%)(?<v
 
 exports.parseTag = (pattern, tag) => {
   try {
-
     let Tag = {}
     let matches = pattern.matchAll(matcher)
 

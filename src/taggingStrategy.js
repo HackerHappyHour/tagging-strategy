@@ -21,7 +21,7 @@ exports.taggingStrategy = ({inputTags, tagName, imageName, extraTags}) => {
 
     return outputTags.join(',')
   } catch (error) {
-    throw new Error(error.message)
+    throw error
   }
 
 }

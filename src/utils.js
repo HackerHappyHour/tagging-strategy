@@ -24,6 +24,9 @@ exports.getInputBoolean = (input) => {
 exports.tagsReducer = (tags,tag) => {
   try {
     let isConditionalTag = /(?<strategy>.*)::'?(?<include>true|false)/i
+    if(tag.search('::') > -1 && !isConditionalTag.test(tag)) {
+      throw new Error(`A conditional tag was detected without a resolved boolean value`)
+    }
     // tag has condition specified, so only return 
     //the tag if the condition is true
     if(isConditionalTag.test(tag)){

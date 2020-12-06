@@ -10,6 +10,6 @@ describe.each(scenarios)('produce tags %s given %o', (expected, given) => {
 describe('taggingStrategy() error handling', () =>{
   test('throws when given a conditional tag without a boolean', () => {
     let given = {tagName: '1.0.0', inputTags: '%X%-foobar::'}
-    expect(() => taggingStrategy(given)).toThrow()
+    expect(() => taggingStrategy(given)).toThrow('A conditional tag was detected without a resolved boolean value')
   })
 })
