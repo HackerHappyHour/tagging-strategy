@@ -50,7 +50,7 @@ The format of the `tags` output is natively compatible with the `tags` input of 
 steps:
   -
     id: tagging-strategy
-    uses: HackerHappyHour/tagging-strategy@v2
+    uses: HackerHappyHour/tagging-strategy@v3
     with:
       tags: '%X%, %X%-debian, %X.Y%, %X.Y%-debian'
       tag_name: '1.0.0'
@@ -169,7 +169,7 @@ steps:
     # Image Tagger
     - name: Image Tag Strategy
       id: tagging
-      uses: HackerHappyHour/tagging-strategy@v2
+      uses: HackerHappyHour/tagging-strategy@v3
       if: ${{ github.event_name == 'release' }}
       with:
         tags: |
@@ -245,7 +245,7 @@ jobs:
     # Image Tagger
     - name: Image Tag Strategy
       id: tagging
-      uses: HackerHappyHour/tagging-strategy@v2
+      uses: HackerHappyHour/tagging-strategy@v3
       if: ${{ github.event_name == 'release' }}
       with:
         tags: |
@@ -312,7 +312,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Produce Docker Tags
         id: tagging
-        uses: HackerHappyHour/tagging-strategy@v2
+        uses: HackerHappyHour/tagging-strategy@v3
         with:
           tags: |
             %X%-foobar
@@ -337,7 +337,7 @@ the event is a push:
 ```yaml
 steps:
   id: tags
-  uses: HackerHappyHour/tagging-strategy@v2
+  uses: HackerHappyHour/tagging-strategy@v3
   with:
     tags: |
       %X%
